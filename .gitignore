@@ -1,2 +1,6 @@
 # Project exclude paths
 /cmake-build-debug/
+/CMakeLists.txt.user.40506ac
+/CMakeLists.txt.user
+/.idea/
+/CMakeLists.txt
