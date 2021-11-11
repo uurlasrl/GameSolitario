@@ -21,7 +21,36 @@ Card::Card(int iid) {
 
 }
 
-CardStackItem::CardStackItem(){
+void Card::paint(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    QPen pen=painter->pen();
+    if(this->cardColor==CardColor::Cuori || this->cardColor==CardColor::Quadri){
+        pen.setColor(Qt::red);
+    }else{
+        pen.setColor(Qt::black);
+    }
+    painter->setPen(pen);
+    painter->drawRoundedRect(position->x()+3,position->y()+5,position->width()-6,position->height()-10,10.0,10.0);
+    QPointF centro(position->center());
+    painter->drawText(centro,QString::number(this->value));
+    centro.setY(centro.y()+25);
+    switch (this->cardColor) {
+        case CardColor::Cuori:
+            painter->drawText(centro,QString("cuori"));
+            break;
+        case CardColor::Quadri:
+            painter->drawText(centro,QString("quadri"));
+            break;
+        case CardColor::Fiori:
+            painter->drawText(centro,QString("fiori"));
+            break;
+        case CardColor::Picche:
+            painter->drawText(centro,QString("picche"));
+            break;
+
+    }
+}
+
+CardStackItem::CardStackItem(QColor *c):color(c){
     rand_generator.seed(QDateTime::currentDateTime().toMSecsSinceEpoch());
 }
 

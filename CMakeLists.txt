@@ -26,6 +26,7 @@ set(PROJECT_SOURCES
         CircolarCardItem.cpp
         SemeItem.cpp
         GameCards.cpp
+        rs.qrc
 
 )
 

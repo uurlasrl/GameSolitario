@@ -3,19 +3,27 @@
 //
 
 #include "CircolarCardItem.h"
+#include <QPainter>
+#include <QStyleOption>
+#include <QGraphicsScene>
 
 /**
  * @brief CircolarCardItem::CircolarCardItem
  * inizializza il mazzo di carte
  */
 
-CircolarCardItem::CircolarCardItem(): CardStackItem() {
+CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c): CardStackItem(c), myw(wi) {
     mazzo.reserve(sizeof(Card *) * 52);
     for (int i = 0; i < 52; i++) {
-        mazzo[i] = new Card(i);
+        mazzo.append(new Card(i));
     }
     mischia();
     resettaMazzo();
+
+    this->scopriCard();
+
+    parentview->scene()->addItem(this);
+
 }
 
 Card *CircolarCardItem::cardAvailable() {
@@ -112,4 +120,37 @@ void CircolarCardItem::mischia() {
     QRandomGenerator generator(QDateTime::currentDateTime().toMSecsSinceEpoch());
     std::shuffle(mazzo.begin(), mazzo.end(), generator);
     resettaMazzo();
+}
+
+bool CircolarCardItem::transferFrom(CardStackItem *otherCardStack, Card *from) {
+    return CardStackItem::transferFrom(otherCardStack, from);
+}
+
+QRectF CircolarCardItem::boundingRect() const {
+    //float myw= this->scene()->width()/7;
+    return QRectF(myw*5,0,myw*2,100);
+}
+
+void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    if(!carteCoperte.isEmpty()){
+        //painter->setBrush(Qt::darkRed);
+
+        QPen pen;
+        pen.setStyle( Qt::SolidLine );
+        pen.setWidth( 2 );
+        pen.setColor( Qt::black );
+        painter->setPen( pen);
+        painter->drawRoundedRect(boundingRect().x()+myw+3,boundingRect().y()+5,myw-6,boundingRect().height()-10,10.0,10.0);
+    }
+    if(!carteScoperte.isEmpty()){
+        //se ci sono carte scoperte
+        QRectF *cardPosition=new QRectF(boundingRect().x(),boundingRect().y(),myw,boundingRect().height());
+        carteScoperte.last()->paint(cardPosition,painter, option, widget);
+    }
+}
+void CircolarCardItem::setSize(QSize newSize) {
+    myw=newSize.width()/7;
+    this->scene()->setSceneRect(0,0,newSize.width(),newSize.height());
+//    qDebug()<<"size:"<<newSize.width();
+//    qDebug()<<"Scene size:"<<this->scene()->width();
 }

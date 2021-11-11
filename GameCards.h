@@ -6,15 +6,26 @@
 #define GAMESOLITARIO_GAME_H
 
 #include <QGraphicsView>
+#include "CircolarCardItem.h"
 
 class GameCards: public QGraphicsView{
     Q_OBJECT
 public:
-    GameCards(QWidget * parent = nullptr);
+    GameCards();
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+
+    void mouseMoveEvent(QMouseEvent *event) override;
+
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
-    QGraphicsScene *scene;
-
+//    QGraphicsScene *scene;
+    CircolarCardItem *ccard;
 };
 
 

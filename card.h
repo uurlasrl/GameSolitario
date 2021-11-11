@@ -6,6 +6,8 @@
 #include <QRandomGenerator>
 #include <QDateTime>
 #include <QGraphicsItem>
+#include <QGraphicsView>
+#include <QColor>
 
 class CircolarCardItem;
 
@@ -23,6 +25,7 @@ public:
 
     CardColor getCardColor();
     int getCardNumber();
+    void paint(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 private:
     Card(int iid);
 
@@ -42,7 +45,7 @@ private:
 class CardStackItem: public QObject, public QGraphicsItem{
     Q_OBJECT
 public:
-    explicit CardStackItem();
+    explicit CardStackItem(QColor *color);
     //controllo se sono finite le carte
     bool isEmpty();
     //carte ancora coperte
@@ -52,7 +55,7 @@ public:
 
     //trasferisce da un CardStackItem ad un altro se ci sono carte disponibili sull'altro container
     // e se la prima carta disponibile e' valida per il container corrente
-    bool transferFrom(CardStackItem *otherCardStack, Card *from);
+    virtual bool transferFrom(CardStackItem *otherCardStack, Card *from);
 
     // verifica se una carta e' valida per il trasferimento
     bool virtual isValid(Card *) = 0;
@@ -71,6 +74,7 @@ public:
     QStack<Card*> carteCoperte;
     QStack<Card*> carteScoperte;
     QRandomGenerator rand_generator;
+    QColor *color;
 private:
 
 };

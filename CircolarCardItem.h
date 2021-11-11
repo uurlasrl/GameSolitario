@@ -13,7 +13,7 @@
  */
 class CircolarCardItem: public CardStackItem{
 public:
-    CircolarCardItem();
+    CircolarCardItem(float ,QGraphicsView * , QColor *);
 
     Card *cardAvailable();
 
@@ -34,10 +34,18 @@ public:
 
     bool isValid(Card *card) override;
 
+    bool transferFrom(CardStackItem *otherCardStack, Card *from) override;
+
+    QRectF boundingRect() const override;
+
+    void setSize(QSize);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
 private:
     QList<Card*> mazzo;
     int cardNumber;
 
+    float myw;
 
 };
 
