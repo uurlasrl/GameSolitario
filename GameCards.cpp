@@ -48,17 +48,36 @@ void GameCards::mousePressEvent(QMouseEvent *event) {
     QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
     if(itemget!= nullptr){
         CardStackItem *item=static_cast<CardStackItem*>(itemget);
-        if(item->isCardDragableAt(event->position())){
-
+        dragStarted = item->isCardDragableAt(event->position());
+        if(dragStarted){
+            dragingReleaseStarted = false;
+            dragingCardList = item->getDragingCard(event->position());
+            dragingItemFrom = item;
         }
     }
     QGraphicsView::mousePressEvent(event);
 }
 
 void GameCards::mouseMoveEvent(QMouseEvent *event) {
+
+    if(dragStarted && !dragingReleaseStarted){
+        //TODO spostamento delle carte
+        //event->position()
+    }
     QGraphicsView::mouseMoveEvent(event);
 }
 
 void GameCards::mouseReleaseEvent(QMouseEvent *event) {
+    if(dragStarted && !dragingReleaseStarted){
+        dragingReleaseStarted = true;
+        QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
+        if(itemget != nullptr){
+            CardStackItem *item=static_cast<CardStackItem*>(itemget);
+            if(item->isValid(dragingCardList[0])){
+                item->transferFrom(dragingItemFrom,dragingCardList[0]);
+            }
+        }
+
+    }
     QGraphicsView::mouseReleaseEvent(event);
 }

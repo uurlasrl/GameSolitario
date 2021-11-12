@@ -26,6 +26,10 @@ protected:
 private:
 //    QGraphicsScene *scene;
     CircolarCardItem *ccard;
+    CardList dragingCardList;
+    bool dragStarted=false;
+    bool dragingReleaseStarted=false;
+    CardStackItem  *dragingItemFrom;
 };
 
 

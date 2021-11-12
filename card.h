@@ -11,6 +11,8 @@
 
 class CircolarCardItem;
 
+#define CardList QList<Card*>
+
 /* tipo della singola carta
  */
 class Card{
@@ -58,23 +60,30 @@ public:
     virtual bool transferFrom(CardStackItem *otherCardStack, Card *from);
 
     // verifica se una carta e' valida per il trasferimento
-    bool virtual isValid(Card *) = 0;
+    virtual bool isValid(Card *) = 0;
 
-    QList<Card*> getCarteScoperte() const;
+    virtual bool isCardDragableAt(QPointF point) = 0;
+
+    virtual CardList getDragingCard(QPointF point) = 0;
+
+    CardList getCarteScoperte() const;
+
 
     signals:
         //viene emesso quando il container si modifica
         //aggiunta una carta, la carta viene tolta oppure per una qualunque
         //operazione che modifica l'aspetto grafico
         //si occupera' anche di fare la rollback di una mossa(forse)
-        void changeData(qint32 eventID, int eventType, QList<Card*> data);
+        void changeData(qint32 eventID, int eventType, CardList data);
 
     protected:
+
     // contiene le carte coperte
     QStack<Card*> carteCoperte;
     QStack<Card*> carteScoperte;
     QRandomGenerator rand_generator;
     QColor *color;
+
 private:
 
 };

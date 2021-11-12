@@ -94,7 +94,7 @@ bool CardStackItem::transferFrom(CardStackItem *otherCardStack, Card*from) {
     int len = idx = otherCardStack->carteScoperte.size() - idx;
 
     // riversa le card da togliere in una lista temporanea
-    QList<Card*> temp;
+    CardList temp;
     while(idx>0){
         temp.append(otherCardStack->carteScoperte.pop());
         idx--;
@@ -111,8 +111,8 @@ bool CardStackItem::transferFrom(CardStackItem *otherCardStack, Card*from) {
 
     return true;
 }
-QList<Card*> CardStackItem::getCarteScoperte() const{
-    QList<Card*> tmp(carteScoperte);
+CardList CardStackItem::getCarteScoperte() const{
+    CardList tmp(carteScoperte);
     return tmp;
 }
 

@@ -23,7 +23,7 @@ CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c)
     this->scopriCard();
 
     parentview->scene()->addItem(this);
-
+    this->setPos(myw*5,0);
 }
 
 Card *CircolarCardItem::cardAvailable() {
@@ -58,7 +58,7 @@ Card *CircolarCardItem::scopriCard() {
     card = carteCoperte.pop();
     carteScoperte.push(card);
     qint32 id= rand_generator.generate();
-    emit changeData(id,3,QList<Card*>({card})); //scopre carta
+    emit changeData(id,3,CardList({card})); //scopre carta
 
     return card;
 }
@@ -74,7 +74,7 @@ bool CircolarCardItem::giraCards() {
             //svuoto le carte scoperte e riempio di nuovo le carte coperte
             while (!carteScoperte.isEmpty())carteCoperte.push(carteScoperte.pop());
             qint32 id=rand_generator.generate();
-            QList<Card*> temp(carteCoperte);
+            CardList temp(carteCoperte);
             carteScoperte.push(carteCoperte.pop());
             emit changeData(id,4,temp); //carte girate
         } else {
@@ -98,7 +98,7 @@ void CircolarCardItem::resettaMazzo() {
     carteCoperte.clear();
     carteCoperte.append(mazzo);
     qint32 id=rand_generator.generate();
-    QList<Card*> tmp;
+    CardList tmp;
     emit changeData(id, 2, tmp); // reset mazzo va reinizializzata anche la parte di gestione dell'undo
 }
 
@@ -128,13 +128,12 @@ bool CircolarCardItem::transferFrom(CardStackItem *otherCardStack, Card *from) {
 
 QRectF CircolarCardItem::boundingRect() const {
     //float myw= this->scene()->width()/7;
-    return QRectF(myw*5,0,myw*2,100);
+    return QRectF(0,0,myw*2,100);
 }
 
 void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     if(!carteCoperte.isEmpty()){
         //painter->setBrush(Qt::darkRed);
-
         QPen pen;
         pen.setStyle( Qt::SolidLine );
         pen.setWidth( 2 );
@@ -150,7 +149,33 @@ void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 }
 void CircolarCardItem::setSize(QSize newSize) {
     myw=newSize.width()/7;
+    this->setPos(myw*5,0);
     this->scene()->setSceneRect(0,0,newSize.width(),newSize.height());
 //    qDebug()<<"size:"<<newSize.width();
 //    qDebug()<<"Scene size:"<<this->scene()->width();
+}
+
+bool CircolarCardItem::isCardDragableAt(QPointF point) {
+    QPointF p = point - this->pos();
+    return p.x()<myw;
+    //return CardStackItem::isCardDragableAt(point);
+}
+
+CardList CircolarCardItem::getDragingCard(QPointF point) {
+    QPointF p = point - this->pos();
+    if(p.x()>=myw)
+        return CardList();
+    else
+        return CardList({carteScoperte[0]});
+    //return CardStackItem::getDragingCard(point);
+}
+
+CardList CircolarCardItem::distributeCards(int number) {
+    CardList tmp;
+    if(carteScoperte.isEmpty()&&!carteCoperte.size()>=number){
+        for( int i=0;i<number;i++){
+            tmp.append(carteCoperte.pop());
+        }
+    }
+    return tmp;
 }

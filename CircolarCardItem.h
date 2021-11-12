@@ -20,8 +20,10 @@ public:
     //prende una carta dalle carte scoperte
     Card *getCard();
 
-    // Card *getCard();
+
     Card *scopriCard();
+
+
     //riporta le carte nella posizione di partenza per ricominciare a scoprirle
     //se le carte dda scoprire non sono finite ritorna vero ma non modifica nulla
     // vero se l'operazione ha avuto successo, falso se le carte sono finite
@@ -41,8 +43,17 @@ public:
     void setSize(QSize);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
+    bool isCardDragableAt(QPointF point) override;
+
+    CardList getDragingCard(QPointF point) override;
+
+    CardList distributeCards(int number);
+
+protected:
+    Card *getHiddenCard() override;
+
 private:
-    QList<Card*> mazzo;
+    CardList mazzo;
     int cardNumber;
 
     float myw;
