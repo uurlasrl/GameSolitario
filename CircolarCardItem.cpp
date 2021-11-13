@@ -12,7 +12,7 @@
  * inizializza il mazzo di carte
  */
 
-CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c): CardStackItem(c), myw(wi) {
+CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c): CardStackItem(c), myw(wi), myh(100){
     mazzo.reserve(sizeof(Card *) * 52);
     for (int i = 0; i < 52; i++) {
         mazzo.append(new Card(i));
@@ -128,7 +128,7 @@ bool CircolarCardItem::transferFrom(CardStackItem *otherCardStack, Card *from) {
 
 QRectF CircolarCardItem::boundingRect() const {
     //float myw= this->scene()->width()/7;
-    return QRectF(0,0,myw*2,100);
+    return QRectF(0,0,myw*2,myh);
 }
 
 void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -147,7 +147,7 @@ void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         carteScoperte.last()->paint(cardPosition,painter, option, widget);
     }
 }
-void CircolarCardItem::setSize(QSize newSize) {
+void CircolarCardItem::setBoardSize(QSize newSize) {
     myw=newSize.width()/7;
     this->setPos(myw*5,0);
     this->scene()->setSceneRect(0,0,newSize.width(),newSize.height());

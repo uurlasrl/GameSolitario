@@ -40,7 +40,7 @@ public:
 
     QRectF boundingRect() const override;
 
-    void setSize(QSize);
+    void setBoardSize(QSize);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     bool isCardDragableAt(QPointF point) override;
@@ -49,14 +49,13 @@ public:
 
     CardList distributeCards(int number);
 
-protected:
-    Card *getHiddenCard() override;
 
 private:
     CardList mazzo;
     int cardNumber;
 
     float myw;
+    float myh;
 
 };
 

@@ -38,7 +38,7 @@ GameCards::GameCards() {
 
 void GameCards::resizeEvent(QResizeEvent *event) {
     if(event->oldSize().width()!=-1){
-        ccard->setSize(event->size());
+        ccard->setBoardSize(event->size());
     }
     QGraphicsView::resizeEvent(event);
 }

@@ -12,8 +12,13 @@ BoardItem::BoardItem(CardList cards) {
         else
             carteCoperte.push(cards[i]);
     }
-
 }
+
 bool BoardItem::isValid(Card *card) {
     return carteScoperte.isEmpty() && carteScoperte.last()->getCardNumber()+1==card->getCardNumber();
+}
+
+void BoardItem::setBoardSize(QSize s) {
+    myw = s.width()/7;
+    myh = 100;
 }

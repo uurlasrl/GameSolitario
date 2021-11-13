@@ -17,11 +17,9 @@ class BoardItem: public CardStackItem{
 
     bool isValid(Card *card) override;
 
-    bool transferFrom(CardStackItem *otherCardStack, Card *from) override;
-
     QRectF boundingRect() const override;
 
-    void setSize(QSize);
+    void setBoardSize(QSize);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     bool isCardDragableAt(QPointF point) override;
@@ -32,7 +30,7 @@ class BoardItem: public CardStackItem{
 private:
 
     float myw;
-
+    float myh;
 };
 
 
