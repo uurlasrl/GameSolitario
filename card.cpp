@@ -1,6 +1,8 @@
 #include "card.h"
 #include <algorithm>
 
+
+QImage *Card::backImage= nullptr;
 /**
  * @brief Card::Card
  * inizializza la carta
@@ -14,41 +16,112 @@ int Card::getCardNumber() {
     return value + 1;
 }
 
+QImage Card::resizedBackImage(int x, int y) {
+    return Card::backImage->scaled(x, y);
+}
+
 Card::Card(int iid) {
+    //QPixmap pixmap
+    //QImage  image(myw-6-10, myh-10-10,QImage::Format_RGB32);
+    if(Card::backImage == nullptr){
+        Card::backImage = new QImage(":/images/card.jpeg");
+    }
+
     id = iid;
     value = iid % 13;
     cardColor = static_cast<CardColor>(iid / 13);
 
 }
 
-void Card::paint(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    QPen pen=painter->pen();
-    if(this->cardColor==CardColor::Cuori || this->cardColor==CardColor::Quadri){
-        pen.setColor(Qt::red);
-    }else{
-        pen.setColor(Qt::black);
-    }
+void Card::paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget, QImage img) {
+    QPen pen;
+    pen.setStyle( Qt::SolidLine );
+    pen.setWidth( 2 );
+    pen.setColor( Qt::black );
     painter->setPen(pen);
-    painter->drawRoundedRect(position->x()+3,position->y()+5,position->width()-6,position->height()-10,10.0,10.0);
-    QPointF centro(position->center());
-    painter->drawText(centro,QString::number(this->value));
-    centro.setY(centro.y()+25);
-    switch (this->cardColor) {
-        case CardColor::Cuori:
-            painter->drawText(centro,QString("cuori"));
-            break;
-        case CardColor::Quadri:
-            painter->drawText(centro,QString("quadri"));
-            break;
-        case CardColor::Fiori:
-            painter->drawText(centro,QString("fiori"));
-            break;
-        case CardColor::Picche:
-            painter->drawText(centro,QString("picche"));
-            break;
-
-    }
+    painter->drawRoundedRect(   boundingRect.x()+3,     boundingRect.y()+5, boundingRect.width()-6,  boundingRect.height()-10 ,10.0,10.0);
+    painter->setBrush(Qt::white);
+    painter->drawImage(         boundingRect.x()+3+5,   boundingRect.y()+5+5, img);
 }
+
+void Card::paint(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {//QRectF *position,
+
+    QPen pen;
+    pen.setStyle( Qt::SolidLine );
+    pen.setWidth( 2 );
+    pen.setColor( Qt::black );
+    painter->setPen(pen);
+    painter->drawRoundedRect(   boundingRect.x()+3,     boundingRect.y()+5, boundingRect.width()-6,  boundingRect.height()-10 ,10.0,10.0);
+//    painter->setBrush(Qt::white);
+//    painter->drawImage(         3+5,   5+5, img);
+
+
+    if(this->getCardNumber()>10){
+        paintFigura(&boundingRect, painter, option, widget);
+    }else{
+        paintCarta(&boundingRect, painter, option, widget);
+    }
+
+}
+
+void Card::paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    QImage imgIcon;
+    QImage figura;
+    QString lettera;
+    QString simbolo;
+    switch (value) {
+        case 10:
+            lettera = "J";
+            break;
+        case 11:
+            lettera = "Q";
+            break;
+        case 12:
+            lettera = "K";
+    }
+    switch (this->cardColor) {
+        case CardColor::Quadri:
+            simbolo = "Quadri";
+        case CardColor::Fiori:
+            simbolo = "Fiori";
+        case CardColor::Picche:
+            simbolo = "Picche";
+        case CardColor::Cuori:
+            simbolo = "Cuori";
+    }
+    painter->drawText(position->x()+15,position->y()+15,lettera);
+    imgIcon.load(":/images/"+simbolo.toLower()+".png");
+    imgIcon = imgIcon.scaled(15,15);
+    figura.load(":/images/"+lettera+simbolo+".png");
+    painter->drawImage(position->x()+30,position->y()+15,imgIcon);
+}
+
+void Card::paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    QImage imgIcon;
+    QString simbolo;
+
+    painter->drawText(position->x()+15,position->y()+15,QString::number(this->getCardNumber()));
+//    if(value<9)
+//        painter->drawText(15,15,QString(strchr("123456789",this->value)));
+//    else
+//        painter->drawText(15,15,QString("10"));
+
+    switch (this->cardColor) {
+        case CardColor::Quadri:
+            simbolo = "Quadri";
+        case CardColor::Fiori:
+            simbolo = "Fiori";
+        case CardColor::Picche:
+            simbolo = "Picche";
+        case CardColor::Cuori:
+            simbolo = "Cuori";
+    }
+    imgIcon.load(":/images/"+simbolo.toLower()+".png");
+    imgIcon = imgIcon.scaled(15,15);
+    painter->drawImage(position->x()+30,position->y()+15,imgIcon);
+
+}
+
 
 CardStackItem::CardStackItem(QColor *c):color(c){
     rand_generator.seed(QDateTime::currentDateTime().toMSecsSinceEpoch());
@@ -115,4 +188,9 @@ CardList CardStackItem::getCarteScoperte() const{
     CardList tmp(carteScoperte);
     return tmp;
 }
+
+//void
+//Card::paintBackOfTheCard(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+//
+//}
 

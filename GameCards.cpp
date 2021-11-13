@@ -20,25 +20,27 @@ GameCards::GameCards() {
     qDebug()<<scene->width();
 //    int posx = (this->rect().width() / 7) + this->rect().width() / 2;
 //    int posy = 10;
+    QColor *color=new QColor(QRandomGenerator::global()->bounded(256),
+                             QRandomGenerator::global()->bounded(256),
+                             QRandomGenerator::global()->bounded(256));
 
     ccard = new CircolarCardItem(scene->width()/7, this,
-            new QColor(QRandomGenerator::global()->bounded(256),
-                       QRandomGenerator::global()->bounded(256),
-                       QRandomGenerator::global()->bounded(256)));
-
-
-
-//    scene->addItem(ccard);
-
-//    ccard->setPos(posx, posy)
-
-
+            color);
+    int scW=scene->width()/7;
+    for(int i=0;i<7;i++){
+        boardItemList.append(
+                new BoardItem(scW,color, ccard->distributeCards( i+1),this)
+                );
+    }
     show();
 }
 
 void GameCards::resizeEvent(QResizeEvent *event) {
     if(event->oldSize().width()!=-1){
         ccard->setBoardSize(event->size());
+        for(int i=0;i<boardItemList.size();i++){
+            boardItemList[i]->setBoardSize(event->size());
+        }
     }
     QGraphicsView::resizeEvent(event);
 }

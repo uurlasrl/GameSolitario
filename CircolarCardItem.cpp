@@ -20,8 +20,6 @@ CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c)
     mischia();
     resettaMazzo();
 
-    this->scopriCard();
-
     parentview->scene()->addItem(this);
     this->setPos(myw*5,0);
 }
@@ -99,6 +97,7 @@ void CircolarCardItem::resettaMazzo() {
     carteCoperte.append(mazzo);
     qint32 id=rand_generator.generate();
     CardList tmp;
+    scopriCard();
     emit changeData(id, 2, tmp); // reset mazzo va reinizializzata anche la parte di gestione dell'undo
 }
 
@@ -132,19 +131,22 @@ QRectF CircolarCardItem::boundingRect() const {
 }
 
 void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+
     if(!carteCoperte.isEmpty()){
+        QRectF rect(boundingRect().x()+myw,boundingRect().y(),myw,myh);
+        Card::paintBackCard(QRectF(myw,0,myw,myh),painter, option, widget,Card::resizedBackImage(myw-6-10, myh-10-10) );
         //painter->setBrush(Qt::darkRed);
-        QPen pen;
-        pen.setStyle( Qt::SolidLine );
-        pen.setWidth( 2 );
-        pen.setColor( Qt::black );
-        painter->setPen( pen);
-        painter->drawRoundedRect(boundingRect().x()+myw+3,boundingRect().y()+5,myw-6,boundingRect().height()-10,10.0,10.0);
+//        QPen pen;
+//        pen.setStyle( Qt::SolidLine );
+//        pen.setWidth( 2 );
+//        pen.setColor( Qt::black );
+//        painter->setPen( pen);
+//        painter->drawRoundedRect(boundingRect().x()+myw+3,boundingRect().y()+5,myw-6,boundingRect().height()-10,10.0,10.0);
     }
     if(!carteScoperte.isEmpty()){
         //se ci sono carte scoperte
-        QRectF *cardPosition=new QRectF(boundingRect().x(),boundingRect().y(),myw,boundingRect().height());
-        carteScoperte.last()->paint(cardPosition,painter, option, widget);
+        QRectF *cardPosition=new QRectF(0,0,myw,boundingRect().height());
+        carteScoperte.last()->paint(QRectF(0,0,myw,myh),painter, option, widget);//,cardPosition
     }
 }
 void CircolarCardItem::setBoardSize(QSize newSize) {
@@ -172,7 +174,7 @@ CardList CircolarCardItem::getDragingCard(QPointF point) {
 
 CardList CircolarCardItem::distributeCards(int number) {
     CardList tmp;
-    if(carteScoperte.isEmpty()&&!carteCoperte.size()>=number){
+    if(carteScoperte.size()==1&&carteCoperte.size()>=number){
         for( int i=0;i<number;i++){
             tmp.append(carteCoperte.pop());
         }

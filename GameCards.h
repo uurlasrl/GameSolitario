@@ -7,6 +7,7 @@
 
 #include <QGraphicsView>
 #include "CircolarCardItem.h"
+#include "BoardItem.h"
 
 class GameCards: public QGraphicsView{
     Q_OBJECT
@@ -26,6 +27,8 @@ protected:
 private:
 //    QGraphicsScene *scene;
     CircolarCardItem *ccard;
+    QList<BoardItem*> boardItemList;
+
     CardList dragingCardList;
     bool dragStarted=false;
     bool dragingReleaseStarted=false;

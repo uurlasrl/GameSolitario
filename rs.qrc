@@ -1,5 +1,21 @@
 <RCC>
-    <qresource prefix="/images">
-        <file>card.jpeg</file>
+    <qresource prefix="/">
+        <file>images/card.jpeg</file>
+        <file>images/cuori.png</file>
+        <file>images/quadri.png</file>
+        <file>images/fiori.png</file>
+        <file>images/cuori.png</file>
+        <file>images/KCuori.png</file>
+        <file>images/KQuadri.png</file>
+        <file>images/KFiori.png</file>
+        <file>images/KCuori.png</file>
+        <file>images/QCuori.png</file>
+        <file>images/QQuadri.png</file>
+        <file>images/QFiori.png</file>
+        <file>images/QCuori.png</file>
+        <file>images/JCuori.png</file>
+        <file>images/JQuadri.png</file>
+        <file>images/JFiori.png</file>
+        <file>images/JCuori.png</file>
     </qresource>
 </RCC>

@@ -1,5 +1,6 @@
 #ifndef GAMESOLITARIO_CARD_H
 #define GAMESOLITARIO_CARD_H
+
 #include <QObject>
 #include <QList>
 #include <QStack>
@@ -8,11 +9,14 @@
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QColor>
+#include <QImage>
+
+
 
 class CircolarCardItem;
 
 #define CardList QList<Card*>
-
+#define CARD_HIGH 100
 /* tipo della singola carta
  */
 class Card{
@@ -25,12 +29,20 @@ public:
         Picche = 3
     };
 
+    static QImage *backImage;
+    static QImage resizedBackImage(int, int);
+
     CardColor getCardColor();
     int getCardNumber();
-    void paint(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paint(QRectF boundingRect,QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);//QRectF *position
+    void paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    static void paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget, QImage img);
+    //static void paintBackOfTheCard(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+
 private:
     Card(int iid);
-
     unsigned short id;
     unsigned short value;
     CardColor cardColor;

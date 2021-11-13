@@ -13,7 +13,7 @@
 class BoardItem: public CardStackItem{
 
     public:
-    BoardItem(CardList cards);
+    explicit BoardItem(float,QColor *color, CardList cards,QGraphicsView *parentview);
 
     bool isValid(Card *card) override;
 
@@ -31,6 +31,7 @@ private:
 
     float myw;
     float myh;
+    int itemCapacity;
 };
 
 
