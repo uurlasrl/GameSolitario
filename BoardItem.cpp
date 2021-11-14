@@ -25,7 +25,9 @@ BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *pare
 }
 
 bool BoardItem::isValid(Card *card) {
-    return carteScoperte.isEmpty() && carteScoperte.last()->getCardNumber()+1==card->getCardNumber();
+    return
+        (carteScoperte.isEmpty() && carteCoperte.isEmpty() && card->getCardNumber()==13) ||
+        (!carteScoperte.isEmpty() && carteScoperte.last()->getCardNumber()+1==card->getCardNumber());
 }
 
 void BoardItem::setBoardSize(QSize s) {
@@ -95,7 +97,7 @@ bool BoardItem::isCardDragableAt(QPointF point) {
 }
 
 QList<Card *> BoardItem::getDragingCard(QPointF point) {
-    int number = point.y()/(myh/6);
+    int number = (point.y()-myh-myh/5)/(myh/6);
     number -= carteCoperte.size();
     CardList tmp;
     for(int i=number;i<carteScoperte.size();i++){

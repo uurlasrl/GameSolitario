@@ -4,18 +4,18 @@
         <file>images/cuori.png</file>
         <file>images/quadri.png</file>
         <file>images/fiori.png</file>
-        <file>images/cuori.png</file>
+        <file>images/picche.png</file>
         <file>images/KCuori.png</file>
         <file>images/KQuadri.png</file>
         <file>images/KFiori.png</file>
-        <file>images/KCuori.png</file>
+        <file>images/KPicche.png</file>
         <file>images/QCuori.png</file>
         <file>images/QQuadri.png</file>
         <file>images/QFiori.png</file>
-        <file>images/QCuori.png</file>
+        <file>images/QPicche.png</file>
         <file>images/JCuori.png</file>
         <file>images/JQuadri.png</file>
         <file>images/JFiori.png</file>
-        <file>images/JCuori.png</file>
+        <file>images/JPicche.png</file>
     </qresource>
 </RCC>

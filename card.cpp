@@ -68,7 +68,7 @@ void Card::paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGr
     QImage imgIcon;
     QImage figura;
     QString lettera;
-    QString simbolo;
+    QString simbolo = getColorName();
     switch (value) {
         case 10:
             lettera = "J";
@@ -79,26 +79,29 @@ void Card::paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGr
         case 12:
             lettera = "K";
     }
-    switch (this->cardColor) {
-        case CardColor::Quadri:
-            simbolo = "Quadri";
-        case CardColor::Fiori:
-            simbolo = "Fiori";
-        case CardColor::Picche:
-            simbolo = "Picche";
-        case CardColor::Cuori:
-            simbolo = "Cuori";
-    }
+
     painter->drawText(position->x()+15,position->y()+15,lettera);
     imgIcon.load(":/images/"+simbolo.toLower()+".png");
     imgIcon = imgIcon.scaled(15,15);
     figura.load(":/images/"+lettera+simbolo+".png");
     painter->drawImage(position->x()+30,position->y()+15,imgIcon);
 }
-
+QString Card::getColorName(){
+    switch (this->getCardColor()) {
+        case CardColor::Quadri:
+            return QString("Quadri");
+        case CardColor::Fiori:
+            return QString("Fiori");
+        case CardColor::Picche:
+            return QString("Picche");
+        case CardColor::Cuori:
+            return QString("Cuori");
+    }
+    return QString();
+}
 void Card::paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     QImage imgIcon;
-    QString simbolo;
+    QString simbolo = getColorName();
 
     painter->drawText(position->x()+15,position->y()+15,QString::number(this->getCardNumber()));
 //    if(value<9)
@@ -106,16 +109,6 @@ void Card::paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGra
 //    else
 //        painter->drawText(15,15,QString("10"));
 
-    switch (this->cardColor) {
-        case CardColor::Quadri:
-            simbolo = "Quadri";
-        case CardColor::Fiori:
-            simbolo = "Fiori";
-        case CardColor::Picche:
-            simbolo = "Picche";
-        case CardColor::Cuori:
-            simbolo = "Cuori";
-    }
     imgIcon.load(":/images/"+simbolo.toLower()+".png");
     imgIcon = imgIcon.scaled(15,15);
     painter->drawImage(position->x()+30,position->y()+15,imgIcon);

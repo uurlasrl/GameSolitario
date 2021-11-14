@@ -8,6 +8,7 @@
 #include <QGraphicsView>
 #include "CircolarCardItem.h"
 #include "BoardItem.h"
+#include "SemeItem.h"
 
 class GameCards: public QGraphicsView{
     Q_OBJECT
@@ -28,6 +29,7 @@ private:
 //    QGraphicsScene *scene;
     CircolarCardItem *ccard;
     QList<BoardItem*> boardItemList;
+    QList<SemeItem*> semiOnBoard;
 
     CardList dragingCardList;
     bool dragStarted=false;

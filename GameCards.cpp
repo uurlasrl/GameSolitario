@@ -4,6 +4,7 @@
 #include <QGraphicsTextItem>
 #include <QResizeEvent>
 #include "GameCards.h"
+#include "SemeItem.h"
 
 
 GameCards::GameCards() {
@@ -32,6 +33,11 @@ GameCards::GameCards() {
                 new BoardItem(scW,color, ccard->distributeCards( i+1),this)
                 );
     }
+
+    for(int i=0;i<4;i++){
+        semiOnBoard.append(new SemeItem(scW,CARD_HIGH,i,color,this));
+    }
+
     show();
 }
 
@@ -40,6 +46,9 @@ void GameCards::resizeEvent(QResizeEvent *event) {
         ccard->setBoardSize(event->size());
         for(int i=0;i<boardItemList.size();i++){
             boardItemList[i]->setBoardSize(event->size());
+        }
+        for(int i=0;i<4;i++){
+            semiOnBoard[i]->setBoardSize(event->size());
         }
     }
     QGraphicsView::resizeEvent(event);
@@ -70,16 +79,32 @@ void GameCards::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void GameCards::mouseReleaseEvent(QMouseEvent *event) {
+    QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
+    if(itemget== nullptr || dragingCardList.isEmpty()){
+        dragStarted=false;
+        dragingCardList.clear();
+        dragingItemFrom= nullptr;
+        return;
+    }else{
+    if(itemget==dragingItemFrom){ //e' un semplice click sull'item
+        for(int i=0;i<4;i++){
+            if(semiOnBoard[i]->isValid(dragingCardList.first())){
+                semiOnBoard[i]->transferFrom(dragingItemFrom,dragingCardList.first());
+                dragStarted=false;
+                dragingCardList.clear();
+                dragingItemFrom= nullptr;
+                return;
+            }
+        }
+    }
     if(dragStarted && !dragingReleaseStarted){
         dragingReleaseStarted = true;
-        QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
-        if(itemget != nullptr){
             CardStackItem *item=static_cast<CardStackItem*>(itemget);
             if(item->isValid(dragingCardList[0])){
                 item->transferFrom(dragingItemFrom,dragingCardList[0]);
             }
-        }
 
+    }
     }
     QGraphicsView::mouseReleaseEvent(event);
 }

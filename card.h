@@ -46,6 +46,8 @@ private:
     unsigned short id;
     unsigned short value;
     CardColor cardColor;
+
+    QString getColorName();
 };
 
 
