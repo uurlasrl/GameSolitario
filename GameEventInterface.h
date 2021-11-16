@@ -1,0 +1,12 @@
+//
+// Created by Domenico Neri on 16/11/21.
+//
+
+#ifndef GAMESOLITARIO_GAMEEVENTINTERFACE_H
+#define GAMESOLITARIO_GAMEEVENTINTERFACE_H
+
+class GameEventInterface{
+
+};
+
+#endif //GAMESOLITARIO_GAMEEVENTINTERFACE_H

@@ -7,7 +7,6 @@
 #include "SemeItem.h"
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QGraphicsItemGroup>
 
 
 GameCards::GameCards() {
@@ -23,9 +22,7 @@ GameCards::GameCards() {
     scene->setBackgroundBrush(Qt::white);
 
     scene->setSceneRect(0,0,800,600);
-    qDebug()<<scene->width();
-//    int posx = (this->rect().width() / 7) + this->rect().width() / 2;
-//    int posy = 10;
+
     m_color=new QColor(QRandomGenerator::global()->bounded(256),
                              QRandomGenerator::global()->bounded(256),
                              QRandomGenerator::global()->bounded(256));

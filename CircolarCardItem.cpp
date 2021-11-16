@@ -121,10 +121,6 @@ void CircolarCardItem::mischia() {
     resettaMazzo();
 }
 
-bool CircolarCardItem::transferFrom(CardStackItem *otherCardStack, Card *from) {
-    return CardStackItem::transferFrom(otherCardStack, from);
-}
-
 QRectF CircolarCardItem::boundingRect() const {
     //float myw= this->scene()->width()/7;
     return QRectF(0,0,myw*2,myh);

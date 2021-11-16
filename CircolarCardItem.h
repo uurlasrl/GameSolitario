@@ -15,14 +15,13 @@ class CircolarCardItem: public CardStackItem{
 public:
     CircolarCardItem(float ,QGraphicsView * , QColor *);
 
+    CardList distributeCards(int number);
+
     Card *cardAvailable();
 
     //prende una carta dalle carte scoperte
     Card *getCard();
-
-
     Card *scopriCard();
-
 
     //riporta le carte nella posizione di partenza per ricominciare a scoprirle
     //se le carte dda scoprire non sono finite ritorna vero ma non modifica nulla
@@ -34,20 +33,20 @@ public:
     // mischia le carte va fatta dopo aver resettato il mazzo
     void mischia();
 
+    //controllo del gioco
     bool isValid(Card *card) override;
 
-    bool transferFrom(CardStackItem *otherCardStack, Card *from) override;
-
-    QRectF boundingRect() const override;
-
+    //ridimensionamento delle carte sul evento di resize della finestra
     void setBoardSize(QSize);
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
+    //gestione evento drag&drop
     bool isCardDragableAt(QPointF point) override;
-
     CardList getDragingCard(QPointF point) override;
 
-    CardList distributeCards(int number);
+    // richieste dall'Item per la gestione della visualizzazione
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
 
 
 private:

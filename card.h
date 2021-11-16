@@ -14,6 +14,7 @@
 
 
 class CircolarCardItem;
+class GameEventInterface;
 
 #define CardList QList<Card*>
 #define CARD_HIGH 100
