@@ -56,7 +56,7 @@ Card *CircolarCardItem::scopriCard() {
     card = carteCoperte.pop();
     carteScoperte.push(card);
     qint32 id= rand_generator.generate();
-    emit changeData(id,3,CardList({card})); //scopre carta
+    emit changeData(id,3,CardList({card}),boundingRect()); //scopre carta
 
     return card;
 }
@@ -74,7 +74,7 @@ bool CircolarCardItem::giraCards() {
             qint32 id=rand_generator.generate();
             CardList temp(carteCoperte);
             carteScoperte.push(carteCoperte.pop());
-            emit changeData(id,4,temp); //carte girate
+            emit changeData(id,4,temp,this->boundingRect()); //carte girate
         } else {
             // le carte coperte sono finite e anche le carte scoperte
             return false;
@@ -98,7 +98,7 @@ void CircolarCardItem::resettaMazzo() {
     qint32 id=rand_generator.generate();
     CardList tmp;
     scopriCard();
-    emit changeData(id, 2, tmp); // reset mazzo va reinizializzata anche la parte di gestione dell'undo
+    emit changeData(id, 2, tmp,boundingRect()); // reset mazzo va reinizializzata anche la parte di gestione dell'undo
 }
 
 /**

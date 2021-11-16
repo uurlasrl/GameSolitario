@@ -11,8 +11,9 @@
  * gestisce le carte da scoprire
  */
 class BoardItem: public CardStackItem{
-
+    Q_OBJECT
     public:
+    virtual ~BoardItem();
     explicit BoardItem(float,QColor *color, CardList cards,QGraphicsView *parentview);
 
     bool isValid(Card *card) override;

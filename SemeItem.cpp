@@ -5,6 +5,7 @@
 #include "SemeItem.h"
 #include <QGraphicsView>
 
+SemeItem::~SemeItem(){}
 SemeItem::SemeItem(float wi, float hi, int id, QColor *color,QGraphicsView *parentview): CardStackItem(color),myw(wi), myh(hi), m_id(id) {
     parentview->scene()->addItem(this);
     this->setPos(myw*id,0);

@@ -10,8 +10,9 @@
  * gestisce le carte di un seme
  */
 class SemeItem: public CardStackItem{
-
+Q_OBJECT
 public:
+    virtual ~SemeItem();
     explicit SemeItem(float wi,float hi,int id, QColor *color,QGraphicsView *parentview);
 
     bool isValid(Card* card) override;

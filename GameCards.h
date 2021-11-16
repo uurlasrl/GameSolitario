@@ -31,10 +31,22 @@ private:
     QList<BoardItem*> boardItemList;
     QList<SemeItem*> semiOnBoard;
 
+    QColor *m_color;
     CardList dragingCardList;
     bool dragStarted=false;
     bool dragingReleaseStarted=false;
     CardStackItem  *dragingItemFrom;
+
+    void removeObjectsFromBoard();
+    void addObjectsToBoard();
+    void refreshMazzo();
+    bool stoppedEvent();
+    void stopEvent();
+    void resumeEvent();
+    bool m_disabedEvent;
+private slots:
+    void changedItem(qint32 eventID, int eventType, CardList data, QRectF);
+    void restartGame();
 };
 
 

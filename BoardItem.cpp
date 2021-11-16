@@ -9,7 +9,7 @@
 #include <QUrl>
 
 
-
+BoardItem::~BoardItem() noexcept {}
 BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *parentview) : CardStackItem(color),  myw(wi), myh(CARD_HIGH){
 
 
@@ -41,7 +41,7 @@ QRectF BoardItem::boundingRect() const {
     qreal theX = 0;//(itemCapacity-1)*myw;
     qreal theY = 0;//myh+(myh/5);
     qreal wid= myw;
-    int sizeCombined = carteScoperte.size()+carteCoperte.size();
+    int sizeCombined = carteScoperte.size()+carteCoperte.size()-1;
     qreal hei = myh+(sizeCombined*(myh/6));
 
     return QRectF(theX,theY, wid, hei);
@@ -49,26 +49,11 @@ QRectF BoardItem::boundingRect() const {
 
 void BoardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
 
-
-
-    //myw-6-10,myh-10-10);
-//    //disegna lo sfondo
-//    painter->setBrush(Qt::lightGray);
-//    painter->drawRoundedRect(boundingRect(),10.0,10.0);
-//    qDebug()<<itemCapacity;
-//    QPen pen;
-//    pen.setStyle( Qt::SolidLine );
-//    pen.setWidth( 2 );
-//    pen.setColor( Qt::black );
-
     QRectF rect = boundingRect();
     if(!carteCoperte.isEmpty()){
         QImage backImage=Card::resizedBackImage(myw-6-10, myh-10-10);
         for(int i=0;i<carteCoperte.size();i++){
             Card::paintBackCard(QRectF(0,(myh/6)*i,myw,myh),painter, option, widget,backImage );
-//            painter->drawImage(boundingRect().x()+3+5,boundingRect().y()+(i*myh/4)+5+5,backImage);
-//            painter->setPen(pen);
-//            painter->drawRoundedRect(boundingRect().x()+3,boundingRect().y()+(i*myh/4)+5,myw-6,myh-10,10.0,10.0);
 
         }
     }
@@ -77,28 +62,18 @@ void BoardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
             carteScoperte[i]->paint(QRectF(0.0,(carteCoperte.size()+i)*myh/6,myw,myh),painter,option,widget);
         }
     }
-//    painter->setPen( pen);
-//    if(!carteScoperte.isEmpty()){
-//        //se ci sono carte scoperte
-//        for(int i=0;i<carteScoperte.size();i++){
-//            QRectF posi = boundingRect();
-//            QRectF *cardPosition=new QRectF(
-//                    posi.x(),
-//                    posi.y()+((myh/4)*(i*carteCoperte.size())),
-//                    myw,
-//                    boundingRect().height());
-//            carteScoperte[i]->paint(cardPosition,painter, option, widget);
-//        }
-//    }
 }
 
 bool BoardItem::isCardDragableAt(QPointF point) {
-    return point.y()>((myh/6)*carteCoperte.size());
+    return (point.y()-myh-(myh/6))>((myh/6)*carteCoperte.size());
 }
 
 QList<Card *> BoardItem::getDragingCard(QPointF point) {
-    int number = (point.y()-myh-myh/5)/(myh/6);
+    int number = (point.y()-myh-myh/6)/(myh/6);
     number -= carteCoperte.size();
+    if(number>carteScoperte.size()-1){
+        return CardList(1,carteScoperte.last());
+    }
     CardList tmp;
     for(int i=number;i<carteScoperte.size();i++){
         tmp.append(carteScoperte[i]);

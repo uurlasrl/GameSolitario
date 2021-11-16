@@ -115,7 +115,7 @@ void Card::paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGra
 
 }
 
-
+CardStackItem::~CardStackItem() {}
 CardStackItem::CardStackItem(QColor *c):color(c){
     rand_generator.seed(QDateTime::currentDateTime().toMSecsSinceEpoch());
 }
@@ -142,7 +142,10 @@ int CardStackItem::sizeScoperte(){
  * @return torna vero se il trasferimanto e' andato a buon fine altrimenti falso
  */
 bool CardStackItem::transferFrom(CardStackItem *otherCardStack, Card*from) {
-
+    QRectF rectOther(otherCardStack->boundingRect());
+    rectOther.moveTo(otherCardStack->pos());
+    QRectF rectThis(boundingRect());
+    rectThis.moveTo(pos());
     //va a cercare l'indice della card
     Card *c;
     int idx= otherCardStack->carteScoperte.size()-1;
@@ -166,14 +169,18 @@ bool CardStackItem::transferFrom(CardStackItem *otherCardStack, Card*from) {
         idx--;
     }
     idx = len-1;
-    while(idx>0) {
-        this->carteScoperte.push(temp[--idx]);
+    while(idx>=0) {
+        this->carteScoperte.push(temp[idx--]);
     }
 
     // comunica le modifiche per un visitors o per la modifica della visualizzazione
     qint32 id = rand_generator.generate();
-    emit changeData(id, 0,temp);//aggiunta carte
-    emit otherCardStack->changeData(id, 1,temp);//rimozione carte
+    QRectF rectAfterThis(boundingRect());
+    rectAfterThis.moveTo(pos());
+    emit changeData(id, 0,temp,rectThis.united(rectAfterThis));//aggiunta carte
+    QRectF rectAfterOther(otherCardStack->boundingRect());
+    rectAfterOther.moveTo(otherCardStack->pos());
+    emit otherCardStack->changeData(id, 1,temp,rectOther.united(rectAfterOther));//rimozione carte
 
     return true;
 }

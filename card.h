@@ -33,6 +33,7 @@ public:
     static QImage resizedBackImage(int, int);
 
     CardColor getCardColor();
+    QString getColorName();
     int getCardNumber();
     void paint(QRectF boundingRect,QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);//QRectF *position
     void paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -47,7 +48,6 @@ private:
     unsigned short value;
     CardColor cardColor;
 
-    QString getColorName();
 };
 
 
@@ -61,6 +61,7 @@ private:
 class CardStackItem: public QObject, public QGraphicsItem{
     Q_OBJECT
 public:
+    virtual ~CardStackItem();
     explicit CardStackItem(QColor *color);
     //controllo se sono finite le carte
     bool isEmpty();
@@ -76,9 +77,9 @@ public:
     // verifica se una carta e' valida per il trasferimento
     virtual bool isValid(Card *) = 0;
 
-    virtual bool isCardDragableAt(QPointF point) = 0;
+    virtual bool isCardDragableAt(QPointF point)=0;
 
-    virtual CardList getDragingCard(QPointF point) = 0;
+    virtual CardList getDragingCard(QPointF point)=0;
 
     CardList getCarteScoperte() const;
 
@@ -88,7 +89,7 @@ public:
         //aggiunta una carta, la carta viene tolta oppure per una qualunque
         //operazione che modifica l'aspetto grafico
         //si occupera' anche di fare la rollback di una mossa(forse)
-        void changeData(qint32 eventID, int eventType, CardList data);
+        void changeData(qint32 eventID, int eventType, CardList data, QRectF);
 
     protected:
 

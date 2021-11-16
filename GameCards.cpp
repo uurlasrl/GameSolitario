@@ -5,11 +5,16 @@
 #include <QResizeEvent>
 #include "GameCards.h"
 #include "SemeItem.h"
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QGraphicsItemGroup>
 
 
 GameCards::GameCards() {
+    stopEvent();
     //create the scene
     QGraphicsScene *scene = new QGraphicsScene();
+    scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     setScene(scene);
 
     //setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -21,26 +26,83 @@ GameCards::GameCards() {
     qDebug()<<scene->width();
 //    int posx = (this->rect().width() / 7) + this->rect().width() / 2;
 //    int posy = 10;
-    QColor *color=new QColor(QRandomGenerator::global()->bounded(256),
+    m_color=new QColor(QRandomGenerator::global()->bounded(256),
                              QRandomGenerator::global()->bounded(256),
                              QRandomGenerator::global()->bounded(256));
 
     ccard = new CircolarCardItem(scene->width()/7, this,
-            color);
-    int scW=scene->width()/7;
+            m_color);
+
+    connect(ccard,&CircolarCardItem::changeData,this,&GameCards::changedItem);
+    ccard->setObjectName("mazzo");
+
+    addObjectsToBoard();
+
+    QVBoxLayout *layout=new QVBoxLayout(this);
+    layout->setAlignment(Qt::AlignRight | Qt::AlignBottom);
+    QPushButton *pushButton = new QPushButton(this);
+    pushButton->setText("reset");
+    pushButton->setObjectName(QString::fromUtf8("pushButton"));
+    layout->addWidget(pushButton);
+    //pushButton->setGeometry(QRect(280, 140, 115, 32));
+    show();
+
+    QObject::connect(pushButton, &QPushButton::clicked, this, &GameCards::restartGame);
+    resumeEvent();
+}
+
+void GameCards::refreshMazzo(){
+    ccard->mischia();
+}
+
+void GameCards::removeObjectsFromBoard(){
+
+    for(int i=0;i<boardItemList.size();i++){
+        BoardItem *bi=boardItemList[i];
+        bi->disconnect();
+        bi->setVisible(false);
+        this->scene()->removeItem(bi);
+        bi->deleteLater();
+    }
+    boardItemList.clear();
+    for(int i=0;i<semiOnBoard.size();i++){
+        SemeItem *sm= semiOnBoard[i];
+        sm->disconnect();
+        sm->setVisible(false);
+        scene()->removeItem(sm);
+        sm->deleteLater();
+    }
+    semiOnBoard.clear();
+
+}
+void GameCards::addObjectsToBoard() {
+    int scW=scene()->width()/7;
     for(int i=0;i<7;i++){
-        boardItemList.append(
-                new BoardItem(scW,color, ccard->distributeCards( i+1),this)
-                );
+        BoardItem *bi=new BoardItem(scW,m_color, ccard->distributeCards( i+1),this);
+        bi->setObjectName(QString("BoardItem :"+QString::number(i)));
+        boardItemList.append(bi);
+        connect(bi,&BoardItem::changeData,this,&GameCards::changedItem);
     }
 
     for(int i=0;i<4;i++){
-        semiOnBoard.append(new SemeItem(scW,CARD_HIGH,i,color,this));
+        SemeItem *si=new SemeItem(scW,CARD_HIGH,i,m_color,this);
+        si->setObjectName("SemeItem :"+QString::number(i));
+        semiOnBoard.append(si);
+        connect(si,&SemeItem::changeData,this,&GameCards::changedItem);
     }
-
-    show();
 }
 
+void GameCards::restartGame(){
+    stopEvent();
+    removeObjectsFromBoard();
+    refreshMazzo();
+    addObjectsToBoard();
+    QRectF rect= ccard->boundingRect();
+    rect.moveTo(ccard->pos());
+    qDebug()<<rect;
+    this->scene()->invalidate(rect);
+    resumeEvent();
+}
 void GameCards::resizeEvent(QResizeEvent *event) {
     if(event->oldSize().width()!=-1){
         ccard->setBoardSize(event->size());
@@ -55,21 +117,32 @@ void GameCards::resizeEvent(QResizeEvent *event) {
 }
 
 void GameCards::mousePressEvent(QMouseEvent *event) {
-
+    if(stoppedEvent()) return;
     QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
     if(itemget!= nullptr){
+
+
+
         CardStackItem *item=static_cast<CardStackItem*>(itemget);
+        qDebug() << " preso itam:"<<item->objectName();
         dragStarted = item->isCardDragableAt(event->position());
         if(dragStarted){
             dragingReleaseStarted = false;
             dragingCardList = item->getDragingCard(event->position());
+            qDebug()<<"preso:";
+            for(int i=0;i<dragingCardList.size();i++){
+                qDebug()<<dragingCardList[i]->getCardNumber()<<" "<<dragingCardList[i]->getColorName()<<",";
+            }
             dragingItemFrom = item;
+        }else{
+            qDebug() << "non sono state prese carte";
         }
     }
     QGraphicsView::mousePressEvent(event);
 }
 
 void GameCards::mouseMoveEvent(QMouseEvent *event) {
+    if(stoppedEvent()) return;
 
     if(dragStarted && !dragingReleaseStarted){
         //TODO spostamento delle carte
@@ -79,6 +152,8 @@ void GameCards::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void GameCards::mouseReleaseEvent(QMouseEvent *event) {
+    if(stoppedEvent()) return;
+
     QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
     if(itemget== nullptr || dragingCardList.isEmpty()){
         dragStarted=false;
@@ -107,4 +182,20 @@ void GameCards::mouseReleaseEvent(QMouseEvent *event) {
     }
     }
     QGraphicsView::mouseReleaseEvent(event);
+}
+
+void GameCards::changedItem(qint32 eventID, int eventType, QList<Card *> data, QRectF area) {
+    //this->invalidateScene(area);
+    this->scene()->invalidate(area);
+    CardStackItem *send = dynamic_cast<CardStackItem *>(sender());
+    qDebug()<<"invalidate da "<<send->objectName()<<" area:"<<area;
+}
+bool GameCards::stoppedEvent(){
+    return m_disabedEvent;
+}
+void GameCards::stopEvent(){
+    m_disabedEvent = true;
+}
+void GameCards::resumeEvent(){
+    m_disabedEvent = false;
 }
