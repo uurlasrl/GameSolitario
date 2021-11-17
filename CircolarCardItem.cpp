@@ -51,12 +51,16 @@ Card *CircolarCardItem::getCard() {
 Card *CircolarCardItem::scopriCard() {
     Card *card;
     if (carteCoperte.isEmpty()) {
-        return nullptr;
+        if(carteScoperte.isEmpty())
+            return nullptr;
+        this->giraCards();
     }
     card = carteCoperte.pop();
     carteScoperte.push(card);
     qint32 id= rand_generator.generate();
-    emit changeData(id,3,CardList({card}),boundingRect()); //scopre carta
+    QRectF rect(boundingRect());
+    rect.moveTo(pos());
+    emit changeData(id,3,CardList({card}),rect); //scopre carta
 
     return card;
 }
@@ -131,13 +135,6 @@ void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     if(!carteCoperte.isEmpty()){
         QRectF rect(boundingRect().x()+myw,boundingRect().y(),myw,myh);
         Card::paintBackCard(QRectF(myw,0,myw,myh),painter, option, widget,Card::resizedBackImage(myw-6-10, myh-10-10) );
-        //painter->setBrush(Qt::darkRed);
-//        QPen pen;
-//        pen.setStyle( Qt::SolidLine );
-//        pen.setWidth( 2 );
-//        pen.setColor( Qt::black );
-//        painter->setPen( pen);
-//        painter->drawRoundedRect(boundingRect().x()+myw+3,boundingRect().y()+5,myw-6,boundingRect().height()-10,10.0,10.0);
     }
     if(!carteScoperte.isEmpty()){
         //se ci sono carte scoperte
@@ -164,7 +161,7 @@ CardList CircolarCardItem::getDragingCard(QPointF point) {
     if(p.x()>=myw)
         return CardList();
     else
-        return CardList({carteScoperte[0]});
+        return CardList({carteScoperte.last()});
     //return CardStackItem::getDragingCard(point);
 }
 
@@ -176,4 +173,17 @@ CardList CircolarCardItem::distributeCards(int number) {
         }
     }
     return tmp;
+}
+
+void CircolarCardItem::scopriCartaIfEmpty(qint32 eventID) {
+        if(carteScoperte.isEmpty() && !carteCoperte.isEmpty()){
+            carteScoperte.push(carteCoperte.pop());
+            qint32 id;
+            if(eventID==0){
+                id= rand_generator.generate();
+            }else{
+                id=eventID;
+            }
+            emit changeData(id,3,CardList({carteScoperte[0]}),boundingRect());
+        }
 }

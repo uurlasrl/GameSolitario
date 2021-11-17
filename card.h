@@ -81,6 +81,8 @@ public:
     virtual bool isCardDragableAt(QPointF point)=0;
 
     virtual CardList getDragingCard(QPointF point)=0;
+    virtual void scopriCartaIfEmpty(qint32 eventID=0)=0;
+
 
     CardList getCarteScoperte() const;
 

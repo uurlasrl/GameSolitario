@@ -181,7 +181,7 @@ bool CardStackItem::transferFrom(CardStackItem *otherCardStack, Card*from) {
     QRectF rectAfterOther(otherCardStack->boundingRect());
     rectAfterOther.moveTo(otherCardStack->pos());
     emit otherCardStack->changeData(id, 1,temp,rectOther.united(rectAfterOther));//rimozione carte
-
+    otherCardStack->scopriCartaIfEmpty(id);
     return true;
 }
 CardList CardStackItem::getCarteScoperte() const{

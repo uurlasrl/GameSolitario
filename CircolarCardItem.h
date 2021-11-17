@@ -33,8 +33,12 @@ public:
     // mischia le carte va fatta dopo aver resettato il mazzo
     void mischia();
 
+
+
+
     //controllo del gioco
     bool isValid(Card *card) override;
+    void scopriCartaIfEmpty(qint32 eventID=0) override;
 
     //ridimensionamento delle carte sul evento di resize della finestra
     void setBoardSize(QSize);

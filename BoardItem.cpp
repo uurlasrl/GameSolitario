@@ -9,7 +9,7 @@
 #include <QUrl>
 
 
-BoardItem::~BoardItem() noexcept {}
+BoardItem::~BoardItem() {}
 BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *parentview) : CardStackItem(color),  myw(wi), myh(CARD_HIGH){
 
 
@@ -27,7 +27,7 @@ BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *pare
 bool BoardItem::isValid(Card *card) {
     return
         (carteScoperte.isEmpty() && carteCoperte.isEmpty() && card->getCardNumber()==13) ||
-        (!carteScoperte.isEmpty() && carteScoperte.last()->getCardNumber()+1==card->getCardNumber());
+        (!carteScoperte.isEmpty() && carteScoperte.last()->getCardNumber()-1==card->getCardNumber());
 }
 
 void BoardItem::setBoardSize(QSize s) {
@@ -79,4 +79,17 @@ QList<Card *> BoardItem::getDragingCard(QPointF point) {
         tmp.append(carteScoperte[i]);
     }
     return tmp;
+}
+
+void BoardItem::scopriCartaIfEmpty(qint32 eventID) {
+    if(carteScoperte.isEmpty() && !carteCoperte.isEmpty()){
+        carteScoperte.push(carteCoperte.pop());
+        qint32 id;
+        if(eventID==0){
+            id= rand_generator.generate();
+        }else{
+            id=eventID;
+        }
+        emit changeData(id,3,CardList({carteScoperte[0]}),boundingRect());
+    }
 }
