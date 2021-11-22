@@ -11,7 +11,7 @@
 #include <QGuiApplication>
 #include <QStandardPaths>
 #include <QFile>
-#include <QByteArray>
+#include <QDataStream>
 
 
 GameCards::GameCards() {
@@ -69,23 +69,22 @@ GameCards::GameCards() {
         auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
         auto fileName = path + "/logFile.txt";
         QFile dataFile(fileName);
-        QByteArray dataTxt;
-        dataTxt.append(QDateTime::currentDateTime().toLocalTime().toString().toLocal8Bit());
-        dataTxt.append(" - ");
-        if (dataFile.open(QIODevice::Append)) {
+        if (dataFile.open(QIODevice::WriteOnly)) {
+            QDataStream dataStream(&dataFile);
+            dataStream.setVersion(QDataStream::Qt_6_1);
             switch (state) {
                 case Qt::ApplicationState::ApplicationActive: {
-                    dataTxt.append("ApplicationActive\r\n");
+                    //dataTxt.append("ApplicationActive\r\n");
                     break;
                 }
                 case Qt::ApplicationState::ApplicationHidden: {
-                    dataTxt.append("ApplicationHidden\r\n");
+                    //dataTxt.append("ApplicationHidden\r\n");
                     break;
                 }
                 case Qt::ApplicationState::ApplicationInactive: {
-                    dataTxt.append("ApplicationInactive\r\n");
+                    //dataTxt.append("ApplicationInactive\r\n");
                     // qui va salvato lo stato dell'applicazione
-                    ccard->serializeTo(dataFile);
+                    ccard->serializeTo(dataStream);
                     for(int i;i<boardItemList.size();i++){
                         boardItemList[i]->serializeTo(dataFile);
                     }

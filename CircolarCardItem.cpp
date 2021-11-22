@@ -185,15 +185,13 @@ void CircolarCardItem::scopriCartaIfEmpty(qint32 eventID) {
 }
 
 void CircolarCardItem::serializeTo(QDataStream &out){
-
     for(int i=0;i<52;i++){
         out << mazzo[i]->id;
     }
     out << myw;
     out << myh;
     out << color;
-    out << carteScoperte.size();
-    for(int i=0;i<carteScoperte.size();i++){
-        out << carteScoperte[i]->id;
-    }
+
+    CardStackItem::serializeTo(out);
+
 }

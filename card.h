@@ -63,6 +63,7 @@ public:
     Colored getCardColored();
     QString getColorName();
     int getCardNumber();
+    int getCardId();
     void paint(QRectF boundingRect,QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);//QRectF *position
     void paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -113,6 +114,7 @@ public:
     virtual CardList getDragingCard(QPointF point)=0;
     virtual void scopriCartaIfEmpty(qint32 eventID=0)=0;
 
+    virtual void serializeTo(QDataStream &dataSteream);
 
     CardList getCarteScoperte() const;
 

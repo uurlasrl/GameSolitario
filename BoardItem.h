@@ -18,6 +18,7 @@ class BoardItem: public CardStackItem{
 
     //controllo del gioco
     bool isValid(Card *card) override;
+    void serializeTo(QDataStream &dataStream);
     void scopriCartaIfEmpty(qint32 eventID=0) override;
 
     //ridimensionamento delle carte sul evento di resize della finestra

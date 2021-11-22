@@ -13,7 +13,9 @@ QList<QImage *> Card::voltiImages;
 Card::CardColor Card::getCardColor() {
     return cardColor;
 }
-
+int Card::getCardId(){
+    return id;
+}
 int Card::getCardNumber() {
     return value + 1;
 }
@@ -266,5 +268,15 @@ void CardStackItem::resetEvent(GameEvent *event) {
                 carteScoperte.push(carteCoperte.pop());
             break;
         }
+    }
+}
+void CardStackItem::serializeTo(QDataStream &dataSteream) {
+    dataSteream << carteScoperte.size();
+    for(int i=0;i<carteScoperte.size();i++){
+        dataSteream << carteScoperte[i]->getCardId();
+    }
+    dataSteream << carteCoperte.size();
+    for(int i=0;i<carteCoperte.size();i++){
+        dataSteream << carteCoperte[i]->getCardId();
     }
 }
