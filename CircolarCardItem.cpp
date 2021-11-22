@@ -17,8 +17,9 @@ CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c)
     for (int i = 0; i < 52; i++) {
         mazzo.append(new Card(i));
     }
-    mischia();
-    resettaMazzo();
+    qint32 id=rand_generator.bounded((qint32)1,(qint32)32000);
+    mischia(id);
+    resettaMazzo(id);
 
     parentview->scene()->addItem(this);
     this->setPos(myw*5,0);
@@ -48,7 +49,7 @@ Card *CircolarCardItem::getCard() {
  * @brief CircolarCardItem::scopri
  * scopre una carte prendendola dalle carte coperte e inserendala sulle carte scoperte
  */
-Card *CircolarCardItem::scopriCard() {
+Card *CircolarCardItem::scopriCard(qint32 eventID) {
     Card *card;
     if (carteCoperte.isEmpty()) {
         if(carteScoperte.isEmpty())
@@ -57,10 +58,10 @@ Card *CircolarCardItem::scopriCard() {
     }
     card = carteCoperte.pop();
     carteScoperte.push(card);
-    qint32 id= rand_generator.generate();
+    qint32 id=eventID==0?rand_generator.bounded((qint32)1,(qint32)32000):eventID;
     QRectF rect(boundingRect());
     rect.moveTo(pos());
-    emit changeData(id,3,CardList({card}),rect); //scopre carta
+    emit changeData(id,Card::CardEventType::scopreCarta,CardList({card}),rect); //scopre carta
 
     return card;
 }
@@ -70,15 +71,15 @@ Card *CircolarCardItem::scopriCard() {
  * riporta le carte nella posizione di partenza per ricominciare a scoprirle
  * @return
  */
-bool CircolarCardItem::giraCards() {
+bool CircolarCardItem::giraCards(qint32 eventID) {
     if (carteCoperte.isEmpty()) {
         if (!carteScoperte.isEmpty()) {
             //svuoto le carte scoperte e riempio di nuovo le carte coperte
             while (!carteScoperte.isEmpty())carteCoperte.push(carteScoperte.pop());
-            qint32 id=rand_generator.generate();
+            qint32 id=eventID==0?rand_generator.bounded((qint32)1,(qint32)32000):eventID;
             CardList temp(carteCoperte);
             carteScoperte.push(carteCoperte.pop());
-            emit changeData(id,4,temp,this->boundingRect()); //carte girate
+            emit changeData(id,Card::CardEventType::giraCarteDelMazzo,temp,this->boundingRect()); //carte girate
         } else {
             // le carte coperte sono finite e anche le carte scoperte
             return false;
@@ -94,15 +95,15 @@ bool CircolarCardItem::giraCards() {
  * @brief CircolarCardItem::resettaMazzo
  * resetta il gioco senza mischiare
  */
-void CircolarCardItem::resettaMazzo() {
-    cardNumber = this->mazzo.size() - 1;
+void CircolarCardItem::resettaMazzo(qint32 eventID) {
+    //cardNumber = this->mazzo.size() - 1;
     carteScoperte.clear();
     carteCoperte.clear();
     carteCoperte.append(mazzo);
-    qint32 id=rand_generator.generate();
+    qint32 id=eventID==0?rand_generator.bounded((qint32)1,(qint32)32000):eventID;
     CardList tmp;
-    scopriCard();
-    emit changeData(id, 2, tmp,boundingRect()); // reset mazzo va reinizializzata anche la parte di gestione dell'undo
+    scopriCard(id);
+    emit changeData(id, Card::CardEventType::resettaMazzo, tmp,boundingRect()); // reset mazzo va reinizializzata anche la parte di gestione dell'undo
 }
 
 /**
@@ -119,10 +120,10 @@ bool CircolarCardItem::isValid(Card *card) {
  * @brief CircolarCardItem::mischia
  * mischia il mazzo e resetta il gioco con la resettaMazzo()
  */
-void CircolarCardItem::mischia() {
+void CircolarCardItem::mischia(qint32 eventID) {
     QRandomGenerator generator(QDateTime::currentDateTime().toMSecsSinceEpoch());
     std::shuffle(mazzo.begin(), mazzo.end(), generator);
-    resettaMazzo();
+    resettaMazzo(eventID);
 }
 
 QRectF CircolarCardItem::boundingRect() const {
@@ -134,7 +135,7 @@ void CircolarCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     if(!carteCoperte.isEmpty()){
         QRectF rect(boundingRect().x()+myw,boundingRect().y(),myw,myh);
-        Card::paintBackCard(QRectF(myw,0,myw,myh),painter, option, widget,Card::resizedBackImage(myw-6-10, myh-10-10) );
+        Card::paintBackCard(QRectF(myw,0,myw,myh),painter, option, widget,Card::resizedBackImage(myw-6-10, myh-10-10) ,Card::resizedVoltiImages(myw-6-10, myh-10-10));
     }
     if(!carteScoperte.isEmpty()){
         //se ci sono carte scoperte
@@ -178,12 +179,21 @@ CardList CircolarCardItem::distributeCards(int number) {
 void CircolarCardItem::scopriCartaIfEmpty(qint32 eventID) {
         if(carteScoperte.isEmpty() && !carteCoperte.isEmpty()){
             carteScoperte.push(carteCoperte.pop());
-            qint32 id;
-            if(eventID==0){
-                id= rand_generator.generate();
-            }else{
-                id=eventID;
-            }
-            emit changeData(id,3,CardList({carteScoperte[0]}),boundingRect());
+            qint32 id=eventID==0?rand_generator.bounded((qint32)1,(qint32)32000):eventID;
+            emit changeData(id,Card::CardEventType::scopreCarta,CardList({carteScoperte[0]}),boundingRect());
         }
+}
+
+void CircolarCardItem::serializeTo(QDataStream &out){
+
+    for(int i=0;i<52;i++){
+        out << mazzo[i]->id;
+    }
+    out << myw;
+    out << myh;
+    out << color;
+    out << carteScoperte.size();
+    for(int i=0;i<carteScoperte.size();i++){
+        out << carteScoperte[i]->id;
+    }
 }

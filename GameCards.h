@@ -37,12 +37,17 @@ private:
     bool dragingReleaseStarted=false;
     CardStackItem  *dragingItemFrom;
 
+    QHash<qint32,QList<GameEvent *> *> eventRepository;
+    QList<qint32 > eventIdStack;
+
     void removeObjectsFromBoard();
     void addObjectsToBoard();
-    void refreshMazzo();
+    void refreshMazzo(qint32 eventID=0);
     bool stoppedEvent();
     void stopEvent();
     void resumeEvent();
+    void clearHistoryEvents();
+    void rollbackGame();
     bool m_disabedEvent;
 private slots:
     void changedItem(qint32 eventID, int eventType, CardList data, QRectF);

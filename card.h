@@ -14,32 +14,59 @@
 
 
 class CircolarCardItem;
-class GameEventInterface;
+class Card;
+class CardStackItem;
 
 #define CardList QList<Card*>
 #define CARD_HIGH 100
+
+struct GameEvent{
+    GameEvent(qint32 id,int ty,CardList dt, QRectF box,CardStackItem *send):
+            eventID(id), eventType(ty), data(dt), area(box),sender(send){};
+    qint32 eventID;
+    int eventType;
+    CardList data;
+    QRectF area;
+    CardStackItem *sender;
+};
+
 /* tipo della singola carta
  */
 class Card{
     friend class CircolarCardItem;
 public:
+    enum CardEventType: qint32 {
+        aggiungeCarte = 0,
+        toglieCarta = 1,
+        resettaMazzo = 2,
+        scopreCarta = 3,
+        giraCarteDelMazzo = 4
+
+    };
     enum CardColor: unsigned short {
         Cuori = 0,
         Quadri = 1,
         Fiori = 2,
         Picche = 3
     };
+    enum Colored: unsigned short {
+        Rosse = 0,
+        Nere = 1
+    };
 
     static QImage *backImage;
+    static QList<QImage*> voltiImages;
     static QImage resizedBackImage(int, int);
+    static QImage resizedVoltiImages(int, int);
 
     CardColor getCardColor();
+    Colored getCardColored();
     QString getColorName();
     int getCardNumber();
     void paint(QRectF boundingRect,QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);//QRectF *position
     void paintFigura(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void paintCarta(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    static void paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget, QImage img);
+    static void paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget, const QImage &img, const QImage &img1);
     //static void paintBackOfTheCard(QRectF *position, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 
@@ -71,9 +98,12 @@ public:
     // numero carte coperte
     int sizeScoperte();
 
+    //resetEventi
+    void resetEvent(GameEvent *event);
+
     //trasferisce da un CardStackItem ad un altro se ci sono carte disponibili sull'altro container
     // e se la prima carta disponibile e' valida per il container corrente
-    virtual bool transferFrom(CardStackItem *otherCardStack, Card *from);
+    virtual bool transferFrom(CardStackItem *otherCardStack, Card *from, qint32 eventID=0);
 
     // verifica se una carta e' valida per il trasferimento
     virtual bool isValid(Card *) = 0;

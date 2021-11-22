@@ -53,7 +53,7 @@ CardList SemeItem::getDragingCard(QPointF point) {
 }
 
 void SemeItem::scopriCartaIfEmpty(qint32 eventID) {
-
+// non fa nulla
 }
 
 //bool SemeItem::transferFrom(CardStackItem *otherCardStack, Card *from) {

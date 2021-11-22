@@ -6,6 +6,7 @@
 #define GAMESOLITARIO_CircolarCardItem_H
 
 #include "card.h"
+#include <QFile>
 /**
  * @brief Mazzo di carte
  * proprio come un mazzo di carte produce oggetti cards
@@ -21,17 +22,17 @@ public:
 
     //prende una carta dalle carte scoperte
     Card *getCard();
-    Card *scopriCard();
+    Card *scopriCard(qint32 eventID=0);
 
     //riporta le carte nella posizione di partenza per ricominciare a scoprirle
     //se le carte dda scoprire non sono finite ritorna vero ma non modifica nulla
     // vero se l'operazione ha avuto successo, falso se le carte sono finite
 
-    bool giraCards();
+    bool giraCards(qint32 eventID=0);
     // ripristina il gioco alla fase iniziale
-    void resettaMazzo();
+    void resettaMazzo(qint32 eventID=0);
     // mischia le carte va fatta dopo aver resettato il mazzo
-    void mischia();
+    void mischia(qint32 eventID=0);
 
 
 
@@ -51,11 +52,11 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
-
+    void serializeTo(QDataStream &file);
 
 private:
     CardList mazzo;
-    int cardNumber;
+    //int cardNumber;
 
     float myw;
     float myh;

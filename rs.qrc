@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/card.jpeg</file>
+        <file>images/card.png</file>
         <file>images/cuori.png</file>
         <file>images/quadri.png</file>
         <file>images/fiori.png</file>
@@ -17,5 +17,13 @@
         <file>images/JQuadri.png</file>
         <file>images/JFiori.png</file>
         <file>images/JPicche.png</file>
+        <file>images/chiara.jpeg</file>
+        <file>images/domenico.jpeg</file>
+        <file>images/davide.jpeg</file>
+        <file>images/enrico.jpeg</file>
+        <file>images/franco.jpeg</file>
+        <file>images/nadine.jpeg</file>
+        <file>images/sandro.jpeg</file>
+        <file>images/sara.jpeg</file>
     </qresource>
 </RCC>

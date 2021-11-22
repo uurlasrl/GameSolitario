@@ -6,11 +6,19 @@
 #include "GameCards.h"
 #include "SemeItem.h"
 #include <QPushButton>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QTimer>
+#include <QGuiApplication>
+#include <QStandardPaths>
+#include <QFile>
+#include <QByteArray>
 
 
 GameCards::GameCards() {
     stopEvent();
+
+    qDebug() << "Application started";
+
     //create the scene
     QGraphicsScene *scene = new QGraphicsScene();
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -35,21 +43,76 @@ GameCards::GameCards() {
 
     addObjectsToBoard();
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setAlignment(Qt::AlignRight | Qt::AlignBottom);
-    QPushButton *pushButton = new QPushButton(this);
-    pushButton->setText("reset");
-    pushButton->setObjectName(QString::fromUtf8("pushButton"));
-    layout->addWidget(pushButton);
-    //pushButton->setGeometry(QRect(280, 140, 115, 32));
+
+
+    QPushButton *resetButton = new QPushButton("reset", this);
+    resetButton->setObjectName(QString::fromUtf8("pushButton"));
+    QPushButton *rollbackButton = new QPushButton("rolback", this);
+    QObject::connect(resetButton, &QPushButton::clicked, this, &GameCards::restartGame);
+    QObject::connect(rollbackButton, &QPushButton::clicked, this, &GameCards::rollbackGame);
+
+    resetButton->show();
+    rollbackButton->show();
+
+
+    rollbackButton->setObjectName(QString::fromUtf8("pushButton"));
+    layout->addWidget(rollbackButton);
+    layout->addWidget(resetButton);
+
     show();
 
-    QObject::connect(pushButton, &QPushButton::clicked, this, &GameCards::restartGame);
+    //QGuiApplication::applicationStateChanged()
+    QObject::connect(qGuiApp, &QGuiApplication::applicationStateChanged, [this](Qt::ApplicationState state) {
+        qDebug() << "** evento:" << state;
+        auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        auto fileName = path + "/logFile.txt";
+        QFile dataFile(fileName);
+        QByteArray dataTxt;
+        dataTxt.append(QDateTime::currentDateTime().toLocalTime().toString().toLocal8Bit());
+        dataTxt.append(" - ");
+        if (dataFile.open(QIODevice::Append)) {
+            switch (state) {
+                case Qt::ApplicationState::ApplicationActive: {
+                    dataTxt.append("ApplicationActive\r\n");
+                    break;
+                }
+                case Qt::ApplicationState::ApplicationHidden: {
+                    dataTxt.append("ApplicationHidden\r\n");
+                    break;
+                }
+                case Qt::ApplicationState::ApplicationInactive: {
+                    dataTxt.append("ApplicationInactive\r\n");
+                    // qui va salvato lo stato dell'applicazione
+                    ccard->serializeTo(dataFile);
+                    for(int i;i<boardItemList.size();i++){
+                        boardItemList[i]->serializeTo(dataFile);
+                    }
+                    for(int i;i<semiOnBoard.size();i++){
+                        semiOnBoard[i]->serializeTo(dataFile);
+                    }
+                    break;
+                }
+                case Qt::ApplicationState::ApplicationSuspended: {
+                    dataTxt.append("ApplicationSuspended\r\n");
+                    break;
+                }
+            }
+            qDebug() << "dati salvati:" << logFile.write(dataTxt);
+            logFile.close();
+        } else {
+            qDebug() << "error opening " << fileName;
+        }
+        qDebug() << "tempFile:" << fileName;
+    });
+
+
     resumeEvent();
 }
 
-void GameCards::refreshMazzo() {
-    ccard->mischia();
+void GameCards::refreshMazzo(qint32 eventID) {
+    ccard->mischia(eventID);
 }
 
 void GameCards::removeObjectsFromBoard() {
@@ -92,6 +155,7 @@ void GameCards::addObjectsToBoard() {
 
 void GameCards::restartGame() {
     stopEvent();
+    clearHistoryEvents();
     removeObjectsFromBoard();
     refreshMazzo();
     addObjectsToBoard();
@@ -117,23 +181,25 @@ void GameCards::resizeEvent(QResizeEvent *event) {
 
 void GameCards::mousePressEvent(QMouseEvent *event) {
     if (stoppedEvent()) return;
+//reset dati evento
+
+    dragStarted = false;
+    dragingCardList.clear();
+    dragingItemFrom = nullptr;
+
     QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
     if (itemget != nullptr) {
-
-
         CardStackItem *item = static_cast<CardStackItem *>(itemget);
-        qDebug() << " preso itam:" << item->objectName();
+//        qDebug() << " preso itam:" << item->objectName();
         dragStarted = item->isCardDragableAt(event->position());
         if (dragStarted) {
             dragingReleaseStarted = false;
             dragingCardList = item->getDragingCard(event->position());
-            qDebug() << "preso:";
-            for (int i = 0; i < dragingCardList.size(); i++) {
-                qDebug() << dragingCardList[i]->getCardNumber() << " " << dragingCardList[i]->getColorName() << ",";
-            }
+//            qDebug() << "preso:";
+//            for (int i = 0; i < dragingCardList.size(); i++) {
+//                qDebug() << dragingCardList[i]->getCardNumber() << " " << dragingCardList[i]->getColorName() << ",";
+//            }
             dragingItemFrom = item;
-        } else {
-            qDebug() << "non sono state prese carte";
         }
     }
     QGraphicsView::mousePressEvent(event);
@@ -153,62 +219,85 @@ void GameCards::mouseReleaseEvent(QMouseEvent *event) {
     if (stoppedEvent()) return;
 
     QGraphicsItem *itemget = this->scene()->itemAt(event->position(), QTransform());
-
-    if (dragingCardList.isEmpty()) {
-        if (itemget == nullptr) {
-            dragStarted = false;
-            dragingCardList.clear();
-            dragingItemFrom = nullptr;
-            return;
-        } else if (itemget == this->ccard) {
-            ccard->scopriCard();
-
-            dragStarted = false;
-            dragingCardList.clear();
-            dragingItemFrom = nullptr;
-            return;
-        }
-    } else {
-        if (itemget == dragingItemFrom) { //e' un semplice click sull'item
-            if (!semiOnBoard.contains(itemget)) //non lo faccio se si tratta di un mazzetto dei semi
-                for (int i = 0; i < 4; i++) {
-                    if (semiOnBoard[i]->isValid(dragingCardList.first())) {
-                        semiOnBoard[i]->transferFrom(dragingItemFrom, dragingCardList.first());
-                        dragStarted = false;
-                        dragingCardList.clear();
-                        dragingItemFrom = nullptr;
-                        return;
+    while (true) {
+        if (dragingCardList.isEmpty()) {
+            if (itemget == nullptr) {
+                break;
+            } else if (itemget == this->ccard) {
+                ccard->scopriCard();
+                break;
+            }
+        } else {
+            if (itemget == dragingItemFrom) { //e' un semplice click sull'item
+                if (!semiOnBoard.contains(itemget)) //non lo faccio se si tratta di un mazzetto dei semi
+                    for (int i = 0; i < 4; i++) {
+                        if (semiOnBoard[i]->isValid(dragingCardList.first())) {
+                            semiOnBoard[i]->transferFrom(dragingItemFrom, dragingCardList.first());
+                            break;
+                        }
+                    }
+                for (int i = 0; i < boardItemList.size(); i++) {
+                    if (boardItemList[i] != itemget && boardItemList[i]->isValid(dragingCardList.first())) {
+                        boardItemList[i]->transferFrom(dragingItemFrom, dragingCardList.first());
+                        break;
                     }
                 }
-            for (int i = 0; i < boardItemList.size(); i++) {
-                if (boardItemList[i] != itemget && boardItemList[i]->isValid(dragingCardList.first())) {
-                    boardItemList[i]->transferFrom(dragingItemFrom, dragingCardList.first());
-                    dragStarted = false;
-                    dragingCardList.clear();
-                    dragingItemFrom = nullptr;
-                    return;
+            }
+            if (dragStarted && !dragingReleaseStarted && itemget != nullptr) {
+                dragingReleaseStarted = true;
+                CardStackItem *item = static_cast<CardStackItem *>(itemget);
+                if (item->isValid(dragingCardList[0]) && item != nullptr) {
+                    item->transferFrom(dragingItemFrom, dragingCardList[0]);
+                    break;
                 }
             }
         }
-        if (dragStarted && !dragingReleaseStarted) {
-            dragingReleaseStarted = true;
-            CardStackItem *item = static_cast<CardStackItem *>(itemget);
-            if (item->isValid(dragingCardList[0])) {
-                item->transferFrom(dragingItemFrom, dragingCardList[0]);
-            }
-            dragStarted = false;
-            dragingCardList.clear();
-            dragingItemFrom = nullptr;
-        }
+        break;
     }
+    dragStarted = false;
+    dragingCardList.clear();
+    dragingItemFrom = nullptr;
     QGraphicsView::mouseReleaseEvent(event);
 }
 
 void GameCards::changedItem(qint32 eventID, int eventType, QList<Card *> data, QRectF area) {
     //this->invalidateScene(area);
-    this->scene()->invalidate(area);
+
     CardStackItem *send = dynamic_cast<CardStackItem *>(sender());
-    qDebug() << "invalidate da " << send->objectName() << " area:" << area;
+    if (send != nullptr && eventType != Card::CardEventType::resettaMazzo) {
+// va memorizzato l'evento
+        GameEvent *ge = new GameEvent(eventID, eventType, data, area, send);
+        if (eventIdStack.contains(eventID)) {
+            QList<GameEvent *> *listaAction = eventRepository[eventID];
+            listaAction->append(ge);
+        } else {
+            //evento nuovo
+            QList<GameEvent *> *tmp = new QList<GameEvent *>();
+            tmp->append(ge);
+            eventIdStack.append(eventID);
+            eventRepository.insert(eventID, tmp);
+        }
+        qDebug() << "aggiunto l'evento " << ge->eventID << " da item " << (send->objectName()) << " tipo "
+                 << ge->eventType;
+    }
+    //QTimer::singleShot(500,[this,area](){
+    this->scene()->invalidate();
+    //});
+//    qDebug() << "invalidate da " << send->objectName() << " area:" << area;
+}
+
+void GameCards::clearHistoryEvents() {
+    while (!eventIdStack.isEmpty()) {
+        qint32 ev = eventIdStack.last();
+        eventIdStack.removeLast();
+        QList<GameEvent *> *tmp = eventRepository[ev];
+        for (int i = 0; i < tmp->size(); i++) {
+            delete tmp->value(i);
+        }
+        tmp->clear();
+        delete tmp;
+    }
+    eventRepository.clear();
 }
 
 bool GameCards::stoppedEvent() {
@@ -221,4 +310,21 @@ void GameCards::stopEvent() {
 
 void GameCards::resumeEvent() {
     m_disabedEvent = false;
+}
+
+void GameCards::rollbackGame() {
+    if (!eventIdStack.isEmpty()) {
+        qint32 ev = eventIdStack.last();
+        eventIdStack.removeLast();
+        QList<GameEvent *> *tmp = eventRepository[ev];
+        eventRepository.remove(ev);
+        for (int i = 0; i < tmp->size(); i++) {
+            GameEvent *ge = tmp->value(tmp->size() - i - 1);
+            ge->sender->resetEvent(ge);
+            this->scene()->invalidate(ge->area);
+            delete ge;
+        }
+        tmp->clear();
+        delete tmp;
+    }
 }

@@ -8,7 +8,7 @@
 #include <QImage>
 #include <QUrl>
 
-
+#define CART_STEP 5
 BoardItem::~BoardItem() {}
 BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *parentview) : CardStackItem(color),  myw(wi), myh(CARD_HIGH){
 
@@ -21,20 +21,22 @@ BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *pare
             carteCoperte.push(cards[i]);
     }
     parentview->scene()->addItem(this);
-    this->setPos(myw*(itemCapacity-1),myh+(myh/6));
+    this->setPos(myw*(itemCapacity-1),myh+(myh/CART_STEP));
 }
 
 bool BoardItem::isValid(Card *card) {
-    return
-        (carteScoperte.isEmpty() && carteCoperte.isEmpty() && card->getCardNumber()==13) ||
-        (!carteScoperte.isEmpty() && carteScoperte.last()->getCardNumber()-1==card->getCardNumber());
+    if(carteScoperte.isEmpty())
+        return carteCoperte.isEmpty()&&card->getCardNumber()==13;
+    else
+        return (carteScoperte.last()->getCardNumber()-1==card->getCardNumber() && carteScoperte.last()->getCardColored()!=card->getCardColored());
 }
 
 void BoardItem::setBoardSize(QSize s) {
+
     //qDebug()<<s;
-    this->setPos(myw*(itemCapacity-1),myh+(myh/6));
     myw = s.width()/7;
     myh = CARD_HIGH;
+    this->setPos(myw*(itemCapacity-1),myh+(myh/CART_STEP));
 }
 
 QRectF BoardItem::boundingRect() const {
@@ -42,7 +44,7 @@ QRectF BoardItem::boundingRect() const {
     qreal theY = 0;//myh+(myh/5);
     qreal wid= myw;
     int sizeCombined = carteScoperte.size()+carteCoperte.size()-1;
-    qreal hei = myh+(sizeCombined*(myh/6));
+    qreal hei = myh+(sizeCombined*(myh/CART_STEP));
 
     return QRectF(theX,theY, wid, hei);
 }
@@ -52,24 +54,25 @@ void BoardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     QRectF rect = boundingRect();
     if(!carteCoperte.isEmpty()){
         QImage backImage=Card::resizedBackImage(myw-6-10, myh-10-10);
+        QImage image2=Card::resizedVoltiImages(myw-6-10, myh-10-10);
         for(int i=0;i<carteCoperte.size();i++){
-            Card::paintBackCard(QRectF(0,(myh/6)*i,myw,myh),painter, option, widget,backImage );
+            Card::paintBackCard(QRectF(0,(myh/CART_STEP)*i,myw,myh),painter, option, widget,backImage, image2);
 
         }
     }
     if(!carteScoperte.isEmpty()){
         for(int i=0;i<carteScoperte.size();i++){
-            carteScoperte[i]->paint(QRectF(0.0,(carteCoperte.size()+i)*myh/6,myw,myh),painter,option,widget);
+            carteScoperte[i]->paint(QRectF(0.0,(carteCoperte.size()+i)*myh/CART_STEP,myw,myh),painter,option,widget);
         }
     }
 }
 
 bool BoardItem::isCardDragableAt(QPointF point) {
-    return (point.y()-myh-(myh/6))>((myh/6)*carteCoperte.size());
+    return (point.y()-myh-(myh/CART_STEP))>((myh/CART_STEP)*carteCoperte.size());
 }
 
 QList<Card *> BoardItem::getDragingCard(QPointF point) {
-    int number = (point.y()-myh-myh/6)/(myh/6);
+    int number = (point.y()-myh-myh/CART_STEP)/(myh/CART_STEP);
     number -= carteCoperte.size();
     if(number>carteScoperte.size()-1){
         return CardList(1,carteScoperte.last());
@@ -84,12 +87,7 @@ QList<Card *> BoardItem::getDragingCard(QPointF point) {
 void BoardItem::scopriCartaIfEmpty(qint32 eventID) {
     if(carteScoperte.isEmpty() && !carteCoperte.isEmpty()){
         carteScoperte.push(carteCoperte.pop());
-        qint32 id;
-        if(eventID==0){
-            id= rand_generator.generate();
-        }else{
-            id=eventID;
-        }
-        emit changeData(id,3,CardList({carteScoperte[0]}),boundingRect());
+        qint32 id=eventID==0?rand_generator.bounded((qint32)1,(qint32)32000):eventID;
+        emit changeData(id,Card::CardEventType::scopreCarta,CardList({carteScoperte[0]}),boundingRect());
     }
 }
