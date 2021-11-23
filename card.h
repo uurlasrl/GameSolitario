@@ -33,7 +33,7 @@ struct GameEvent{
     CardList data;
     QRectF area;
     CardStackItem *sender;
-    void serilizeTo(QDataStream &dataStream);
+    void serializeTo(QDataStream &dataStream);
     //void deserilizeFrom(QDataStream &dataStream, CardGenerator *cardGenerator);
 };
 

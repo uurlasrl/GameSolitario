@@ -51,8 +51,7 @@ Card::Card(int iid) {
 
 }
 
-void
-Card::paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget,
+void Card::paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget,
                     const QImage &img, const QImage &img1) {
     QPen pen;
     pen.setStyle(Qt::SolidLine);
@@ -233,8 +232,6 @@ bool CardStackItem::transferFrom(CardStackItem *otherCardStack, Card *from, qint
     rectAfterThis.moveTo(pos());
     emit changeData(id, Card::CardEventType::aggiungeCarte, temp, rectThis.united(rectAfterThis));//aggiunta carte
 
-
-
     return true;
 }
 
@@ -272,7 +269,8 @@ void CardStackItem::resetEvent(GameEvent *event) {
         }
     }
 }
-void CardStackItem::deserializeFrom(QDataStream &dataStream, CardGenerator *cardGenerator){
+
+void CardStackItem::deserializeFrom(QDataStream &dataStream, CardGenerator *cardGenerator) {
     carteScoperte.clear();
     qsizetype nScoperte;
     dataStream >> nScoperte;
@@ -290,6 +288,7 @@ void CardStackItem::deserializeFrom(QDataStream &dataStream, CardGenerator *card
         carteScoperte.append(cardGenerator->getCardById(id));
     }
 }
+
 void CardStackItem::serializeTo(QDataStream &dataStream) {
     //dataStream << color;
     dataStream << carteScoperte.size();
@@ -302,13 +301,14 @@ void CardStackItem::serializeTo(QDataStream &dataStream) {
     }
 }
 
-void GameEvent::serilizeTo(QDataStream &dataStream) {
+void GameEvent::serializeTo(QDataStream &dataStream) {
     dataStream << eventID;
     dataStream << eventType;
-    dataStream << area;
+    //dataStream << area;
     dataStream << data.size();
     for (int i = 0; i < data.size(); i++) {
         dataStream << data[i]->getCardId();
     }
+    dataStream << this->sender->objectName();
 
 }

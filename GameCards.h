@@ -43,7 +43,7 @@ private:
 
     void removeObjectsFromBoard();
     void addObjectsToBoard();
-    void addObjectsToBoard(QDataStream &dataStream);
+    void addObjectsToBoard(QDataStream &dataStream, QHash<QString,CardStackItem*> &itemByName);
     void refreshMazzo(qint32 eventID=0);
     bool stoppedEvent();
     void stopEvent();
