@@ -6,15 +6,19 @@
 #define GAMESOLITARIO_CircolarCardItem_H
 
 #include "card.h"
+#include "GameCards.h"
 #include <QFile>
 /**
  * @brief Mazzo di carte
  * proprio come un mazzo di carte produce oggetti cards
  *
  */
-class CircolarCardItem: public CardStackItem{
+class CircolarCardItem: public CardStackItem, public CardGenerator{
 public:
     CircolarCardItem(float ,QGraphicsView * , QColor *);
+
+    //costruttore che ripristina i dati da salvataggio
+    CircolarCardItem(float d, QGraphicsView *, QColor *, QDataStream &stream);
 
     CardList distributeCards(int number);
 
@@ -35,7 +39,7 @@ public:
     void mischia(qint32 eventID=0);
 
 
-
+    Card *getCardById(unsigned short id) override;
 
     //controllo del gioco
     bool isValid(Card *card) override;
@@ -52,10 +56,11 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
-    void serializeTo(QDataStream &dataStream);
+    void serializeTo(QDataStream &dataStream) override;
 
 private:
     CardList mazzo;
+    CardList mazzoBack;
     //int cardNumber;
 
     float myw;

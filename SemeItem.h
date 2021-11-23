@@ -14,6 +14,7 @@ Q_OBJECT
 public:
     virtual ~SemeItem();
     explicit SemeItem(float wi,float hi,int id, QColor *color,QGraphicsView *parentview);
+    explicit SemeItem(float wi,float hi,int id, QColor *color,QGraphicsView *parentview, CardGenerator *cardGenerator, QDataStream &dataStream);
 
     //controllo del gioco
     bool isValid(Card* card) override;
@@ -30,6 +31,7 @@ public:
 // richieste dall'Item per la gestione della visualizzazione
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    //void serializeTo(QDataStream &dataStream);
 private:
     float myw;
     float myh;

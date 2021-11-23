@@ -39,16 +39,17 @@ private:
 
     QHash<qint32,QList<GameEvent *> *> eventRepository;
     QList<qint32 > eventIdStack;
+    bool m_disabedEvent;
 
     void removeObjectsFromBoard();
     void addObjectsToBoard();
+    void addObjectsToBoard(QDataStream &dataStream);
     void refreshMazzo(qint32 eventID=0);
     bool stoppedEvent();
     void stopEvent();
     void resumeEvent();
     void clearHistoryEvents();
     void rollbackGame();
-    bool m_disabedEvent;
 private slots:
     void changedItem(qint32 eventID, int eventType, CardList data, QRectF);
     void restartGame();

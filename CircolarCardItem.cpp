@@ -12,19 +12,49 @@
  * inizializza il mazzo di carte
  */
 
-CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c): CardStackItem(c), myw(wi), myh(100){
+CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c): CardStackItem(c), myw(wi), myh(CARD_HIGH){
     mazzo.reserve(sizeof(Card *) * 52);
+    mazzoBack.reserve(sizeof(Card *) * 52);
     for (int i = 0; i < 52; i++) {
-        mazzo.append(new Card(i));
+        Card * c=new Card(i);
+        mazzo.append(c);
+        mazzoBack.append(c);
     }
+
     qint32 id=rand_generator.bounded((qint32)1,(qint32)32000);
     mischia(id);
-    resettaMazzo(id);
+    //resettaMazzo(id);
 
     parentview->scene()->addItem(this);
     this->setPos(myw*5,0);
 }
 
+CircolarCardItem::CircolarCardItem(float wi,QGraphicsView *parentview,QColor *c, QDataStream &dataStream): CardStackItem(c), myw(wi), myh(CARD_HIGH){
+    mazzo.reserve(sizeof(Card *) * 52);
+    mazzoBack.reserve(sizeof(Card *) * 52);
+    for (int i = 0; i < 52; i++) {
+        mazzoBack.append(new Card(i));
+    }
+
+    qint32 id=rand_generator.bounded((qint32)1,(qint32)32000);
+
+    mazzo.clear();
+    for(int i=0;i<52;i++){
+        unsigned short id;
+        dataStream >> id;
+        mazzo.append(mazzoBack[id]);
+    }
+
+    CardStackItem::deserializeFrom(dataStream, this);
+
+    parentview->scene()->addItem(this);
+    this->setPos(myw*5,0);
+}
+
+Card *CircolarCardItem::getCardById(unsigned short id){
+    if(id<32) return mazzoBack[id];
+    return nullptr;
+}
 Card *CircolarCardItem::cardAvailable() {
     if (!this->carteScoperte.isEmpty()) {
         return this->carteCoperte.last();
@@ -188,10 +218,5 @@ void CircolarCardItem::serializeTo(QDataStream &out){
     for(int i=0;i<52;i++){
         out << mazzo[i]->id;
     }
-    out << myw;
-    out << myh;
-    out << color;
-
     CardStackItem::serializeTo(out);
-
 }

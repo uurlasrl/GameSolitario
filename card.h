@@ -20,6 +20,11 @@ class CardStackItem;
 #define CardList QList<Card*>
 #define CARD_HIGH 100
 
+class  CardGenerator{
+public:
+    virtual Card *getCardById(unsigned short id) = 0;
+};
+
 struct GameEvent{
     GameEvent(qint32 id,int ty,CardList dt, QRectF box,CardStackItem *send):
             eventID(id), eventType(ty), data(dt), area(box),sender(send){};
@@ -28,6 +33,8 @@ struct GameEvent{
     CardList data;
     QRectF area;
     CardStackItem *sender;
+    void serilizeTo(QDataStream &dataStream);
+    //void deserilizeFrom(QDataStream &dataStream, CardGenerator *cardGenerator);
 };
 
 /* tipo della singola carta
@@ -115,6 +122,8 @@ public:
     virtual void scopriCartaIfEmpty(qint32 eventID=0)=0;
 
     virtual void serializeTo(QDataStream &dataSteream);
+
+    void deserializeFrom(QDataStream &dataStream, CardGenerator *cardGenerator);
 
     CardList getCarteScoperte() const;
 

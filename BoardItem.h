@@ -15,10 +15,11 @@ class BoardItem: public CardStackItem{
     public:
     virtual ~BoardItem();
     explicit BoardItem(float,QColor *color, CardList cards,QGraphicsView *parentview);
+    explicit BoardItem(float,QColor *color, CardGenerator *cardGenerator, int ic, QGraphicsView *parentview, QDataStream &dataStream);
 
     //controllo del gioco
     bool isValid(Card *card) override;
-    void serializeTo(QDataStream &dataStream);
+    //void serializeTo(QDataStream &dataStream);
     void scopriCartaIfEmpty(qint32 eventID=0) override;
 
     //ridimensionamento delle carte sul evento di resize della finestra
@@ -36,6 +37,7 @@ private:
 
     float myw;
     float myh;
+    //numero di carte coperte iniziali
     int itemCapacity;
 };
 

@@ -24,24 +24,66 @@ GameCards::GameCards() {
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     setScene(scene);
 
-    //setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // a white background
     scene->setBackgroundBrush(Qt::white);
 
     scene->setSceneRect(0, 0, 800, 600);
 
+    // se non si puo' aprire il file significa che non esiste
     m_color = new QColor(QRandomGenerator::global()->bounded(256),
                          QRandomGenerator::global()->bounded(256),
                          QRandomGenerator::global()->bounded(256));
 
-    ccard = new CircolarCardItem(scene->width() / 7, this,
-                                 m_color);
+    bool initialized = true;
+    auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto fileName = path + "/backupFile.dat";
+    QFile dataFile(fileName);
+    if (dataFile.open(QIODevice::ReadOnly)) {
+        //esiste un file di salvataggio
+        //quindi effettuo il ripristino dell'applicazione
+        QDataStream dataStream(&dataFile);
+        if(dataStream.version()==QDataStream::Qt_6_1) {
+            ccard = new CircolarCardItem(scene->width() / 7, this, m_color, dataStream);
+            ccard->setObjectName("mazzo");
 
-    connect(ccard, &CircolarCardItem::changeData, this, &GameCards::changedItem);
-    ccard->setObjectName("mazzo");
+            addObjectsToBoard(dataStream);
 
-    addObjectsToBoard();
+
+            qsizetype nEvent;
+            dataStream >> nEvent;
+            for (int i = 0; i < nEvent; i++) {
+                qint32 eventId;
+                dataStream >> eventId;
+                eventIdStack.append(eventId);
+            }
+            dataStream >> nEvent;
+            for (int i = 0; i < nEvent; i++) {
+                qsizetype nEventList;
+                dataStream >> nEventList;
+                for (int j = 0; i < nEventList; j++) {
+                new GameEvent(qint32 id,int ty,CardList dt, QRectF box,CardStackItem *send):
+                eventID(id), eventType(ty), data(dt), area(box),sender(send){};
+                for (int j = 0; i < eventRepository.size(); j++) {
+                    eventRepository[i]->value(j)->serilizeTo(dataStream);
+                }
+            }
+            initialized = true;
+        }
+        dataFile.close();
+    }
+
+    if(!initialized){
+
+        ccard = new CircolarCardItem(scene->width() / 7, this, m_color);
+
+                                     connect(ccard, &CircolarCardItem::changeData, this, &GameCards::changedItem);
+        ccard->setObjectName("mazzo");
+
+        addObjectsToBoard();
+    }
+
+
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setAlignment(Qt::AlignRight | Qt::AlignBottom);
@@ -67,39 +109,54 @@ GameCards::GameCards() {
     QObject::connect(qGuiApp, &QGuiApplication::applicationStateChanged, [this](Qt::ApplicationState state) {
         qDebug() << "** evento:" << state;
         auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        auto fileName = path + "/logFile.txt";
+        auto fileName = path + "/backupFile.dat";
         QFile dataFile(fileName);
         if (dataFile.open(QIODevice::WriteOnly)) {
             QDataStream dataStream(&dataFile);
             dataStream.setVersion(QDataStream::Qt_6_1);
-            switch (state) {
-                case Qt::ApplicationState::ApplicationActive: {
-                    //dataTxt.append("ApplicationActive\r\n");
-                    break;
-                }
-                case Qt::ApplicationState::ApplicationHidden: {
-                    //dataTxt.append("ApplicationHidden\r\n");
-                    break;
-                }
-                case Qt::ApplicationState::ApplicationInactive: {
+//            switch (state) {
+//                case Qt::ApplicationState::ApplicationActive: {
+//                    //dataTxt.append("ApplicationActive\r\n");
+//                    break;
+//                }
+//                case Qt::ApplicationState::ApplicationHidden: {
+//                    //dataTxt.append("ApplicationHidden\r\n");
+//                    break;
+//                }
+//                case Qt::ApplicationState::ApplicationInactive: {
                     //dataTxt.append("ApplicationInactive\r\n");
+
                     // qui va salvato lo stato dell'applicazione
+                    if(state == Qt::ApplicationState::ApplicationInactive){
                     ccard->serializeTo(dataStream);
                     for(int i;i<boardItemList.size();i++){
-                        boardItemList[i]->serializeTo(dataFile);
+                        boardItemList[i]->serializeTo(dataStream);
                     }
                     for(int i;i<semiOnBoard.size();i++){
-                        semiOnBoard[i]->serializeTo(dataFile);
+                        semiOnBoard[i]->serializeTo(dataStream);
                     }
-                    break;
-                }
-                case Qt::ApplicationState::ApplicationSuspended: {
-                    dataTxt.append("ApplicationSuspended\r\n");
-                    break;
-                }
-            }
-            qDebug() << "dati salvati:" << logFile.write(dataTxt);
-            logFile.close();
+
+                    dataStream <<eventIdStack.size();
+                    for(int i=0;i<eventIdStack.size();i++){
+                        dataStream<<eventIdStack[i];
+                    }
+                    dataStream <<eventRepository.size();
+                    for(int i=0;i<eventRepository.size();i++) {
+                        dataStream << eventRepository[i]->size();
+                        for (int j = 0; i < eventRepository.size(); j++) {
+                            eventRepository[i]->value(j)->serilizeTo(dataStream);
+                        }
+                    }
+                    }
+//                    break;
+//                }
+//                case Qt::ApplicationState::ApplicationSuspended: {
+//                    //dataTxt.append("ApplicationSuspended\r\n");
+//                    break;
+//                }
+//            }
+            //qDebug() << "dati salvati:" << logFile.write(dataTxt);
+            dataFile.close();
         } else {
             qDebug() << "error opening " << fileName;
         }
@@ -151,7 +208,23 @@ void GameCards::addObjectsToBoard() {
         connect(si, &SemeItem::changeData, this, &GameCards::changedItem);
     }
 }
+void GameCards::addObjectsToBoard(QDataStream &dataStream) {
+    int scW = scene()->width() / 7;
+    boardItemList.clear();
+    for (int i = 0; i < 7; i++) {
+        BoardItem *bi = new BoardItem(scW, m_color, ccard,i+1, this, dataStream);
+        bi->setObjectName(QString("BoardItem :" + QString::number(i)));
+        boardItemList.append(bi);
+        connect(bi, &BoardItem::changeData, this, &GameCards::changedItem);
+    }
 
+    for (int i = 0; i < 4; i++) {
+        SemeItem *si = new SemeItem(scW, CARD_HIGH, i, m_color, this,ccard, dataStream);
+        si->setObjectName("SemeItem :" + QString::number(i));
+        semiOnBoard.append(si);
+        connect(si, &SemeItem::changeData, this, &GameCards::changedItem);
+    }
+}
 void GameCards::restartGame() {
     stopEvent();
     clearHistoryEvents();

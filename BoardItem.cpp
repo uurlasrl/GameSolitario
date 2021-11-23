@@ -23,6 +23,13 @@ BoardItem::BoardItem(float wi,QColor *color, CardList cards, QGraphicsView *pare
     parentview->scene()->addItem(this);
     this->setPos(myw*(itemCapacity-1),myh+(myh/CART_STEP));
 }
+BoardItem::BoardItem(float wi,QColor *color, CardGenerator *cardGenerator,int ic, QGraphicsView *parentview, QDataStream &dataStream) : CardStackItem(color),  myw(wi), myh(CARD_HIGH){
+
+    itemCapacity = ic;
+    CardStackItem::deserializeFrom(dataStream,cardGenerator);
+    parentview->scene()->addItem(this);
+    this->setPos(myw*(itemCapacity-1),myh+(myh/CART_STEP));
+}
 
 bool BoardItem::isValid(Card *card) {
     if(carteScoperte.isEmpty())
@@ -91,3 +98,9 @@ void BoardItem::scopriCartaIfEmpty(qint32 eventID) {
         emit changeData(id,Card::CardEventType::scopreCarta,CardList({carteScoperte[0]}),boundingRect());
     }
 }
+//void BoardItem::serializeTo(QDataStream &dataStream) {
+//    //dataStream << myw;
+//    //dataStream << myh;
+//    //dataStream << itemCapacity;
+//    CardStackItem::serializeTo(dataStream);
+//}

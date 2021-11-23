@@ -10,6 +10,12 @@ SemeItem::SemeItem(float wi, float hi, int id, QColor *color,QGraphicsView *pare
     parentview->scene()->addItem(this);
     this->setPos(myw*id,0);
 }
+SemeItem::SemeItem(float wi, float hi, int id, QColor *color,QGraphicsView *parentview, CardGenerator *cardGenerator, QDataStream &dataStream): CardStackItem(color),myw(wi), myh(hi), m_id(id) {
+
+    CardStackItem::deserializeFrom(dataStream,cardGenerator);
+    parentview->scene()->addItem(this);
+    this->setPos(myw*id,0);
+}
 
 bool SemeItem::isValid(Card *card) {
     if(carteScoperte.isEmpty())
@@ -56,8 +62,9 @@ void SemeItem::scopriCartaIfEmpty(qint32 eventID) {
 // non fa nulla
 }
 
-//bool SemeItem::transferFrom(CardStackItem *otherCardStack, Card *from) {
-//    if(otherCardStack->sizeScoperte()>0&&otherCardStack->getCarteScoperte().last()==from)
-//        return CardStackItem::transferFrom(otherCardStack, from);
-//    return true;
+//void SemeItem::serializeTo(QDataStream &dataStream) {
+//    //dataStream << myw;
+//    //dataStream << myh;
+//    //dataStream << m_id;
+//    CardStackItem::serializeTo(dataStream);
 //}

@@ -13,9 +13,11 @@ QList<QImage *> Card::voltiImages;
 Card::CardColor Card::getCardColor() {
     return cardColor;
 }
-int Card::getCardId(){
+
+int Card::getCardId() {
     return id;
 }
+
 int Card::getCardNumber() {
     return value + 1;
 }
@@ -49,7 +51,8 @@ Card::Card(int iid) {
 
 }
 
-void Card::paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget,
+void
+Card::paintBackCard(QRectF boundingRect, QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget,
                     const QImage &img, const QImage &img1) {
     QPen pen;
     pen.setStyle(Qt::SolidLine);
@@ -153,7 +156,6 @@ Card::Colored Card::getCardColored() {
 }
 
 CardStackItem::~CardStackItem() {}
-
 
 
 CardStackItem::CardStackItem(QColor *c) : color(c) {
@@ -270,13 +272,43 @@ void CardStackItem::resetEvent(GameEvent *event) {
         }
     }
 }
-void CardStackItem::serializeTo(QDataStream &dataSteream) {
-    dataSteream << carteScoperte.size();
-    for(int i=0;i<carteScoperte.size();i++){
-        dataSteream << carteScoperte[i]->getCardId();
+void CardStackItem::deserializeFrom(QDataStream &dataStream, CardGenerator *cardGenerator){
+    carteScoperte.clear();
+    qsizetype nScoperte;
+    dataStream >> nScoperte;
+    for (int i = 0; i < nScoperte; i++) {
+        unsigned short id;
+        dataStream >> id;
+        carteScoperte.append(cardGenerator->getCardById(id));
     }
-    dataSteream << carteCoperte.size();
-    for(int i=0;i<carteCoperte.size();i++){
-        dataSteream << carteCoperte[i]->getCardId();
+    carteCoperte.clear();
+    qsizetype nCoperte;
+    dataStream >> nCoperte;
+    for (int i = 0; i < nCoperte; i++) {
+        unsigned short id;
+        dataStream >> id;
+        carteScoperte.append(cardGenerator->getCardById(id));
     }
+}
+void CardStackItem::serializeTo(QDataStream &dataStream) {
+    //dataStream << color;
+    dataStream << carteScoperte.size();
+    for (int i = 0; i < carteScoperte.size(); i++) {
+        dataStream << carteScoperte[i]->getCardId();
+    }
+    dataStream << carteCoperte.size();
+    for (int i = 0; i < carteCoperte.size(); i++) {
+        dataStream << carteCoperte[i]->getCardId();
+    }
+}
+
+void GameEvent::serilizeTo(QDataStream &dataStream) {
+    dataStream << eventID;
+    dataStream << eventType;
+    dataStream << area;
+    dataStream << data.size();
+    for (int i = 0; i < data.size(); i++) {
+        dataStream << data[i]->getCardId();
+    }
+
 }
